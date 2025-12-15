@@ -1,73 +1,158 @@
-# React + TypeScript + Vite
+# Projekt Bewertungssystem - Modul 324 & 450
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Eine Webanwendung zur Verfolgung und Bewertung von Projekten gemäß den Anforderungen der Module 324 (DevOps) und 450 (Testing).
 
-Currently, two official plugins are available:
+## 📋 Funktionalität
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. Personendaten erfassen
+- Name, Vorname
+- Thema der Arbeit
+- Datum der Abgabe
+- Speicherung in der Datenbank über Backend-API
 
-## React Compiler
+### 2. Kriterien-Fortschritt verfolgen
+- Darstellung von Kriterien aus JSON (ID, Titel, Leitfrage, Anforderungen, Gütestufen)
+- Abhaken von erfüllten Anforderungen
+- Notizen zu jedem Kriterium
+- Automatische Berechnung der Gütestufe (0-3)
+- Persistierung in der Datenbank
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+### 3. Notenberechnung
+- Automatische Berechnung basierend auf Gütestufen
+- Separate Berechnung für Teil 1 (Umsetzung) und Teil 2 (Dokumentation)
+- Visuelle Darstellung des Fortschritts
+- Detailübersicht aller Kriterien
 
-## Expanding the ESLint configuration
+## 🏗️ Technologie-Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Frontend
+- **React** mit TypeScript
+- **Tailwind CSS** für Styling
+- **Shadcn/ui** Komponenten-Bibliothek
+- **Sonner** für Toast-Benachrichtigungen
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
+### Backend
+- **Supabase Edge Functions** (Hono Web Framework)
+- **Deno** Runtime
+- REST API mit CORS-Support
+- Ausführliche Fehlerbehandlung und Logging
+
+### Datenbank
+- **Supabase Key-Value Store** (PostgreSQL)
+- Speicherung von:
+    - Personendaten
+    - Kriterien (JSON)
+    - Fortschritt pro Kriterium
+    - Notizen
+
+## 📊 Datenmodell
+
+### Key-Value Store Schema
+
+```
+person_data: {
+  name: string,
+  vorname: string,
+  thema: string,
+  datum: string
+}
+
+criteria_json: [
   {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+    id: string,
+    titel: string,
+    leitfrage: string,
+    anforderungen: string[],
+    gutestufen: {
+      "0": string,
+      "1": string,
+      "2": string,
+      "3": string
+    }
+  }
+]
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+criterion_progress_{id}: {
+  checkedRequirements: number[],
+  notes: string
+}
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🔌 API-Endpunkte
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Personendaten
+- `POST /make-server-e2bf8d92/person` - Personendaten speichern
+- `GET /make-server-e2bf8d92/person` - Personendaten abrufen
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Kriterien
+- `GET /make-server-e2bf8d92/criteria` - Alle Kriterien abrufen
+
+### Fortschritt
+- `POST /make-server-e2bf8d92/progress` - Fortschritt speichern
+- `GET /make-server-e2bf8d92/progress/:id` - Fortschritt für Kriterium abrufen
+
+### Notenberechnung
+- `GET /make-server-e2bf8d92/grades` - Berechnung aller Noten und Gütestufen
+
+## 🎯 Gütestufen-Berechnung
+
+Die Gütestufe für jedes Kriterium wird basierend auf der Anzahl erfüllter Anforderungen berechnet:
+
+- **Gütestufe 3**: Alle Anforderungen erfüllt
+- **Gütestufe 2**: 4-5 Anforderungen erfüllt
+- **Gütestufe 1**: 2-3 Anforderungen erfüllt
+- **Gütestufe 0**: Weniger als 2 Anforderungen erfüllt
+
+### Notenberechnung
+
+Die Note wird aus dem Durchschnitt der Gütestufen berechnet:
+
 ```
+Note = (Durchschnitt Gütestufe / 3) × 5 + 1
+```
+
+- **Teil 1** (Umsetzung): Kriterien A, B, C
+- **Teil 2** (Dokumentation): Kriterien DOC, G, H
+
+## 🚀 Verwendung
+
+1. **Personendaten erfassen**: Geben Sie Ihre persönlichen Daten ein
+2. **Kriterien bearbeiten**: Haken Sie erfüllte Anforderungen ab und fügen Sie Notizen hinzu
+3. **Note berechnen**: Sehen Sie Ihre aktuelle Note basierend auf Ihrem Fortschritt
+
+## 🔒 Sicherheitshinweise
+
+- Sensible Daten werden über HTTPS übertragen
+- Authorization-Header mit Supabase Public Key
+- CORS konfiguriert für sichere API-Aufrufe
+- Eingabevalidierung auf Backend-Seite
+
+## 📝 Beispiel-Kriterien
+
+Die Applikation enthält 3 vordefinierte Kriterien:
+
+1. **A01** - Requirements Engineering
+2. **C02** - Datenmodell entwickeln
+3. **DOC01** - Dokumentation
+
+Diese Kriterien können durch Bearbeitung der JSON-Daten im Backend erweitert werden.
+
+## 🧪 Testing & DevOps
+
+Dieses Projekt wurde entwickelt, um die Anforderungen der Module 324 und 450 zu erfüllen:
+
+### Modul 324 (DevOps)
+- Automatisiertes Build-System
+- CI/CD-Pipeline Integration möglich
+- Systematische Versionskontrolle
+- Code-Qualität durch TypeScript
+
+### Modul 450 (Testing)
+- Testbare Architektur
+- Klare Trennung Frontend/Backend
+- Dokumentierte API-Endpunkte
+- Fehlerbehandlung und Logging
+
+## 📄 Lizenz
+
+Dieses Projekt wurde für Bildungszwecke erstellt.
