@@ -1,0 +1,26 @@
+[
+  {
+    "id": "A01",
+    "title": "Auftragsanalyse und Wahl einer Projektmethode",
+    "question": "Wie erfolgt die Auftragsanalyse? Welche Projektmethode kommt zum Einsatz?",
+    "requirements": [
+      "Der Projektauftrag wurde analysiert und die Erkenntnisse mittels geeigneter Darstellungsmethoden (z. B. Zielstruktur, Use-Case- oder Kontextdiagramm, Anforderungstabelle) schriftlich dokumentiert.",
+      "Dokumentation aus Punkt 1 liefert die Grundlage, um die Projektziele konsequent zu verfolgen.",
+      "Eine zur Aufgabe passende Projektmethode wurde ausgewählt.",
+      "Die Wahl der Projektmethode ist nachvollziehbar und schriftlich begründet."
+    ],
+    "qualityLevels": {
+      "2": {
+        "description": "Drei Punkte sind erfüllt.",
+        "minRequirements": 3
+      },
+      "1": {
+        "description": "Zwei Punkte sind erfüllt.",
+        "minRequirements": 2
+      },
+      "0": {
+        "description": "Weniger als zwei Punkte sind erfüllt."
+      }
+    }
+  }
+]
