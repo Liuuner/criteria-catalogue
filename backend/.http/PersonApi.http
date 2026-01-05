@@ -1,5 +1,13 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
+### Create a new person
+POST http://localhost:8080/api/persons
+Content-Type: application/json
 
-###
+{
+  "firstname": "John",
+  "lastname": "Doe",
+  "topic": "Sample Topic",
+  "date": "2024-06-15"
+}
+
+### Get Person by ID
+GET http://localhost:8080/api/persons/AA01
