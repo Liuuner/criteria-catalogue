@@ -1,5 +1,8 @@
-### Create a new person
-POST http://localhost:8080/api/persons
+### Get all criteria
+GET http://localhost:8080/api/criteria
+
+### Create a new Ipa
+POST http://localhost:8080/api/ipa
 Content-Type: application/json
 
 {
@@ -9,5 +12,14 @@ Content-Type: application/json
   "date": "2024-06-15"
 }
 
-### Get Person by ID
-GET http://localhost:8080/api/persons/AA01
+### Get IPA by ID
+GET http://localhost:8080/api/ipa/AA02
+
+### Get Ipa Criteria by ID
+GET http://localhost:8080/api/ipa/AA02/criteria
+
+### Get Ipa personal data by ID
+GET http://localhost:8080/api/ipa/AA02/person-data
+
+### Delete IPA by ID
+DELETE http://localhost:8080/api/ipa/AA02/criteria/BB03

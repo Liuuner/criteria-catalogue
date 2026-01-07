@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Liuuner/criteria-catalogue/backend/internal/common"
 	"github.com/Liuuner/criteria-catalogue/backend/internal/models"
 )
 
-// Store ist ein Thread-sicherer In-Memory-Datenspeicher.
 type CriteriaStore struct {
 	Criteria []models.Criterion
 }
 
 // NewStore erstellt und initialisiert einen neuen Store.
-func NewCriteriaStore(criteriaFilePath string) (*CriteriaStore, error) {
+func NewCriteriaStore(cfg common.Config) (*CriteriaStore, error) {
 	s := &CriteriaStore{}
 
 	// Lade Kriterien aus der JSON-Datei
-	file, err := os.ReadFile(criteriaFilePath)
+	file, err := os.ReadFile(cfg.CriteriaFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("kann Kriteriendatei nicht lesen: %w", err)
 	}

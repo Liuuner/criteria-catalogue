@@ -12,25 +12,22 @@ func SetupRouter(h *Handlers) *gin.Engine {
 	// CORS-Middleware für die Kommunikation mit dem Frontend
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"} // Passe den Port ggf. an
-	config.AllowMethods = []string{"GET", "POST", "OPTIONS"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	r.Use(cors.New(config))
 
-	// API-Routen gruppiert unter einem Präfix, wie im Original
 	api := r.Group("/api")
 	{
-		// Personendaten-Endpunkte
-		api.GET("/persons/:id", h.GetPersonDataHandler)
-		api.POST("/persons", h.SavePersonDataHandler)
-		/*
-			// Kriterien-Endpunkte
-			api.GET("/criteria", h.GetCriteriaHandler)
+		api.POST("/ipa", h.CreateIpaProjectHandler) // Erstellt neues IPA-Projekt (Personendaten + Basiskriterien) von Personendaten
+		api.GET("/ipa/:id", h.GetIpaProjectHandler) // Holt gesamtes IPA-Projekt (Personendaten + Kriterien)
 
-			// Fortschritt-Endpunkte
-			api.GET("/progress/:id", h.GetProgressHandler)
-			api.POST("/progress", h.SaveProgressHandler)
+		api.GET("/ipa/:id/criteria", h.GetIpaCriteriaHandler)                // Holt Kriterien einer bestimmten IPA
+		api.POST("/ipa/:id/criteria", h.NotImplementedHandler)               // Fügt ein neues Kriterium zu einer bestimmten IPA hinzu
+		api.PUT("/ipa/:id/criteria/:criteriaId", h.NotImplementedHandler)    // Aktualisiert ein Kriterium einer bestimmten IPA
+		api.DELETE("/ipa/:id/criteria/:criteriaId", h.NotImplementedHandler) // Löscht ein Kriterium aus einer bestimmten IPA
 
-			// Notenberechnungs-Endpunkt
-			api.GET("/grades", h.GetGradesHandler)*/
+		api.GET("/ipa/:id/person-data", h.GetPersonDataHandler)  // Holt die Personendaten für die IPA mit der angegebenen ID
+		api.PUT("/ipa/:id/person-data", h.NotImplementedHandler) // Aktualisiert die Personendaten für die IPA mit der angegebenen ID
+		api.GET("/ipa/:id/grade", h.NotImplementedHandler)       // Calculates and returns the grade for the IPA project with the given ID
 	}
 
 	return r

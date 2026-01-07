@@ -4,18 +4,24 @@ import (
 	"log"
 
 	"github.com/Liuuner/criteria-catalogue/backend/internal/api"
+	"github.com/Liuuner/criteria-catalogue/backend/internal/common"
 	"github.com/Liuuner/criteria-catalogue/backend/internal/store"
 )
 
 func main() {
+	cfg, err := common.LoadConfig()
+	if err != nil {
+		log.Fatalf("Fehler beim Laden der Konfiguration: %v", err)
+	}
+
 	// Initialisiere den Datenspeicher mit der Kriteriendatei
-	dataStore, err := store.NewCriteriaStore("criteria.json")
+	dataStore, err := store.NewCriteriaStore(cfg)
 	if err != nil {
 		log.Fatalf("Fehler beim Initialisieren des CriteriaStores: %v", err)
 	}
 	log.Printf("Loaded %d criteria from file.", len(dataStore.GetAllCriteria()))
 
-	mongoStore, err := store.NewMongoStore()
+	mongoStore, err := store.NewMongoStore(cfg)
 	if err != nil {
 		log.Fatalf("Fehler beim Initialisieren des MongoStores: %v", err)
 	}
@@ -23,16 +29,16 @@ func main() {
 
 	// Initialisiere die Handler mit dem Store
 	handlers := &api.Handlers{
-		CriteriaStore: dataStore,
-		MongoStore:    mongoStore,
+		JsonStore:  dataStore,
+		MongoStore: mongoStore,
 	}
 
 	// Richte den Router ein
 	router := api.SetupRouter(handlers)
 
 	// Starte den Server
-	log.Println("Server wird auf Port 8080 gestartet...")
-	if err := router.Run(":8080"); err != nil {
-		log.Fatalf("Server konnte nicht gestartet werden: %v", err)
+	log.Printf("Server wird auf Port %d gestartet...", cfg.ServerPort)
+	if err := router.Run(common.FormatServerAddress(cfg.ServerPort)); err != nil {
+		log.Fatalf("Laufzeitfehler des Servers: %v", err)
 	}
 }
