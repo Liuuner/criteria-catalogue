@@ -1,6 +1,11 @@
 package models
 
-import "github.com/Liuuner/criteria-catalogue/backend/internal/common"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/Liuuner/criteria-catalogue/backend/internal/common"
+)
 
 // IpaProject speichert die persönlichen Informationen.
 type MongoIpaProject struct {
@@ -95,4 +100,24 @@ type CriterionGrade struct {
 	CriterionID    string `json:"criterionId"`
 	CriterionTitle string `json:"criterionTitle"`
 	QualityLevel   int    `json:"qualityLevel"`
+}
+
+func SetCriterionDefaultValuesIfMissing(criterion *Criterion) error {
+	if criterion.Checked == nil {
+		criterion.Checked = make([]int, 0)
+	}
+	if criterion.QualityLevels == nil {
+		return errors.New(fmt.Sprintf("QualityLevels cannot be nil at criterion %s", criterion.ID))
+	}
+	for key, ql := range criterion.QualityLevels {
+		SetQualityLevelDefaultValuesIfMissing(&ql)
+		criterion.QualityLevels[key] = ql
+	}
+	return nil
+}
+
+func SetQualityLevelDefaultValuesIfMissing(ql *QualityLevel) {
+	if ql.RequiredIndexes == nil {
+		ql.RequiredIndexes = make([]int, 0)
+	}
 }

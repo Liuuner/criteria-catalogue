@@ -59,7 +59,7 @@ func (h *Handlers) CreateIpaProjectHandler(c *gin.Context) {
 		return
 	}
 
-	personData.Criteria = h.JsonStore.GetAllCriteria()
+	personData.Criteria = h.JsonStore.GetMandatoryCriteria()
 
 	mongoPersonData := personData.MapWithoutId()
 
@@ -96,6 +96,7 @@ func (h *Handlers) GetIpaCriteriaHandler(c *gin.Context) {
 // GetPredefinedCriteriaHandler liefert alle Kriterien.
 func (h *Handlers) GetPredefinedCriteriaHandler(c *gin.Context) {
 	criteria := h.JsonStore.GetAllCriteria()
+	log.Printf("response: %+v\n\n", criteria)
 	c.JSON(http.StatusOK, criteria)
 }
 

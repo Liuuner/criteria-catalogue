@@ -19,7 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Fehler beim Initialisieren des CriteriaStores: %v", err)
 	}
-	log.Printf("Loaded %d criteria from file.", len(dataStore.GetAllCriteria()))
+	log.Printf("Loaded %d criteria from file, %d are mandatory", len(dataStore.GetAllCriteria()), len(dataStore.GetMandatoryCriteria()))
 
 	mongoStore, err := store.NewMongoStore(cfg)
 	if err != nil {

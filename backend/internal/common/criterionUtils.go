@@ -1,6 +1,8 @@
 package common
 
-import "strings"
+import (
+	"strings"
+)
 
 // IsMandatoryCriterion checks if a criterion is mandatory.
 // true when:

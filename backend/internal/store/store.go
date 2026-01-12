@@ -23,7 +23,7 @@ type MongoStore struct {
 func NewMongoStore(cfg common.Config) (*MongoStore, error) {
 	s := &MongoStore{}
 	var err error
-	s.client, err = mongo.Connect(options.Client().ApplyURI(cfg.MongoDBURI))
+	s.client, err = mongo.Connect(options.Client().ApplyURI(cfg.MongoURI))
 
 	if err != nil {
 		return nil, err
