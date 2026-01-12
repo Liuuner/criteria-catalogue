@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func FormatPersonID(n int) string {
+func FormatProjectID(n int) string {
 	const maxPerPrefix = 100 // 00–99
 
 	prefixIndex := n / maxPerPrefix
@@ -17,7 +17,7 @@ func FormatPersonID(n int) string {
 	return fmt.Sprintf("%c%c%02d", first, second, number)
 }
 
-func ParsePersonID(id string) (int, error) {
+func ParseProjectID(id string) (int, error) {
 	if len(id) != 4 {
 		return 0, fmt.Errorf("invalid id length")
 	}
