@@ -18,8 +18,43 @@ GET http://localhost:8080/api/ipa/AA02
 ### Get Ipa Criteria by ID
 GET http://localhost:8080/api/ipa/AA02/criteria
 
+### Add a criterion to IPA
+POST http://localhost:8080/api/ipa/AA02/criteria
+Content-Type: application/json
+
+{
+  "id": "BB03",
+  "title": "Test Criterion",
+  "question": "Test Description"
+}
+
+### Update a criterion of IPA ## TODO BUG: currently doesn't do anything when id doesn't exist
+PUT http://localhost:8080/api/ipa/AA02/criteria/BB03
+Content-Type: application/json
+
+{
+  "id": "BB03",
+  "title": "Updated Criterion",
+  "question": "Updated Description"
+}
+
+### Delete a criterion from IPA
+DELETE http://localhost:8080/api/ipa/AA02/criteria/BB03
+
 ### Get Ipa personal data by ID
 GET http://localhost:8080/api/ipa/AA02/person-data
 
-### Delete IPA by ID
-DELETE http://localhost:8080/api/ipa/AA02/criteria/BB03
+### Update Ipa personal data by ID
+PUT http://localhost:8080/api/ipa/AA02/person-data
+Content-Type: application/json
+
+{
+  "firstname": "Jane",
+  "lastname": "Doe",
+  "topic": "Updated Topic",
+  "date": "2024-07-01"
+}
+
+### Get grade for IPA
+GET http://localhost:8080/api/ipa/AA02/grade
+

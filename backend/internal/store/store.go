@@ -79,3 +79,76 @@ func (s *MongoStore) GetIpaProject(personId string) (models.MongoIpaProject, err
 	err = s.collection.FindOne(ctx, filter).Decode(&result)
 	return result, err
 }
+
+func (s *MongoStore) UpdateIpaProject(personId string, data models.MongoIpaProject) (*mongo.UpdateResult, error) {
+	id, err := common.ParseProjectID(personId)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{{"id", id}}
+	update := bson.D{{"$set", data}}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return s.collection.UpdateOne(ctx, filter, update)
+}
+
+func (s *MongoStore) AddCriterionToIpaProject(personId string, criterion models.Criterion) (*mongo.UpdateResult, error) {
+	id, err := common.ParseProjectID(personId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if a criterion with the same id already exists
+	filter := bson.D{
+		{"id", id},
+		{"criteria.id", criterion.ID},
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	count, err := s.collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	if count > 0 {
+		return nil, errors.New("criterion with the same id already exists")
+	}
+
+	// Add the new criterion
+	filter = bson.D{{"id", id}}
+	update := bson.D{{"$push", bson.D{{"criteria", criterion}}}}
+	return s.collection.UpdateOne(ctx, filter, update)
+}
+
+func (s *MongoStore) UpdateCriterionInIpaProject(personId string, criterionId string, criterion models.Criterion) (*mongo.UpdateResult, error) {
+	id, err := common.ParseProjectID(personId)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{{"id", id}, {"criteria.id", criterionId}}
+	update := bson.D{{"$set", bson.D{{"criteria.$", criterion}}}}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return s.collection.UpdateOne(ctx, filter, update)
+}
+
+func (s *MongoStore) DeleteCriterionFromIpaProject(personId string, criterionId string) (*mongo.UpdateResult, error) {
+	id, err := common.ParseProjectID(personId)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.D{{"id", id}}
+	update := bson.D{{"$pull", bson.D{{"criteria", bson.D{{"id", criterionId}}}}}}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return s.collection.UpdateOne(ctx, filter, update)
+}

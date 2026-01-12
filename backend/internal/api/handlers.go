@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Liuuner/criteria-catalogue/backend/internal/grade"
 	"github.com/Liuuner/criteria-catalogue/backend/internal/models"
 	"github.com/Liuuner/criteria-catalogue/backend/internal/store"
 	"github.com/gin-gonic/gin"
@@ -22,21 +23,32 @@ func (h *Handlers) NotImplementedHandler(c *gin.Context) {
 	c.JSON(http.StatusNotImplemented, gin.H{"error": "This endpoint is not implemented yet."})
 }
 
-// GetPersonDataHandler liefert die Personendaten.
-func (h *Handlers) GetPersonDataHandler(c *gin.Context) {
+// getIpaProjectFromRequest is a helper function to get an IPA project from a request.
+func (h *Handlers) getIpaProjectFromRequest(c *gin.Context) (*models.MongoIpaProject, error) {
 	personId := c.Param("id")
 	log.Printf("Request IpaProject with ID: %s", personId)
-	data, err := h.MongoStore.GetPersonData(personId)
+	project, err := h.MongoStore.GetIpaProject(personId)
 	if errors.Is(err, mongo.ErrNoDocuments) {
 		log.Printf("No IpaProject found with ID: %s", personId)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Keine Personendaten gefunden."})
-		return
-	} else if err != nil {
-		log.Printf("Error retrieving IpaProject with ID %s: %v", personId, err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Fehler beim Abrufen der Personendaten: " + err.Error()})
-		return
+		c.JSON(http.StatusNotFound, gin.H{"error": "Kein IPA-Projekt gefunden."})
+		return nil, err
 	}
-	c.JSON(http.StatusOK, data.Map())
+	if err != nil {
+		log.Printf("Error retrieving IpaProject with ID %s: %v", personId, err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Fehler beim Abrufen des IPA-Projekts: " + err.Error()})
+		return nil, err
+	}
+	return &project, nil
+}
+
+// GetPersonDataHandler liefert die Personendaten.
+func (h *Handlers) GetPersonDataHandler(c *gin.Context) {
+	project, err := h.getIpaProjectFromRequest(c)
+	if err != nil {
+		return // Error is already handled by helper
+	}
+	project.Criteria = nil // We only want person data
+	c.JSON(http.StatusOK, project.Map())
 }
 
 // CreateIpaProjectHandler speichert die Personendaten.
@@ -66,41 +78,101 @@ func (h *Handlers) CreateIpaProjectHandler(c *gin.Context) {
 }
 
 func (h *Handlers) GetIpaProjectHandler(c *gin.Context) {
-	personId := c.Param("id")
-	log.Printf("Request IPA IpaProject with ID: %s", personId)
-	data, err := h.MongoStore.GetIpaProject(personId)
-	if errors.Is(err, mongo.ErrNoDocuments) {
-		log.Printf("No IPA IpaProject found with ID: %s", personId)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Kein IPA-Projekt gefunden."})
-		return
-	}
+	project, err := h.getIpaProjectFromRequest(c)
 	if err != nil {
-		log.Printf("Error retrieving IPA IpaProject with ID %s: %v", personId, err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Fehler beim Abrufen des IPA-Projekts: " + err.Error()})
-		return
+		return // Error is already handled by helper
 	}
-	c.JSON(http.StatusOK, data.Map())
+	c.JSON(http.StatusOK, project.Map())
 }
 
 func (h *Handlers) GetIpaCriteriaHandler(c *gin.Context) {
-	personId := c.Param("id")
-	log.Printf("Request IPA Criteria with ID: %s", personId)
-	data, err := h.MongoStore.GetIpaProject(personId)
-	if errors.Is(err, mongo.ErrNoDocuments) {
-		log.Printf("No IPA Criteria found with ID: %s", personId)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Kein IPA-Criteria gefunden."})
-		return
-	}
+	project, err := h.getIpaProjectFromRequest(c)
 	if err != nil {
-		log.Printf("Error retrieving IPA Criteria with ID %s: %v", personId, err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Fehler beim Abrufen des IPA-Projekts: " + err.Error()})
-		return
+		return // Error is already handled by helper
 	}
-	c.JSON(http.StatusOK, data.Criteria)
+	c.JSON(http.StatusOK, project.Criteria)
 }
 
 // GetPredefinedCriteriaHandler liefert alle Kriterien.
 func (h *Handlers) GetPredefinedCriteriaHandler(c *gin.Context) {
 	criteria := h.JsonStore.GetAllCriteria()
 	c.JSON(http.StatusOK, criteria)
+}
+
+func (h *Handlers) CreateIpaCriteriaHandler(c *gin.Context) {
+	personId := c.Param("id")
+	var criterion models.Criterion
+	if err := c.ShouldBindJSON(&criterion); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ungültige Eingabedaten: " + err.Error()})
+		return
+	}
+
+	_, err := h.MongoStore.AddCriterionToIpaProject(personId, criterion)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Hinzufügen des Kriteriums: " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, criterion)
+}
+
+func (h *Handlers) UpdateIpaCriteriaHandler(c *gin.Context) {
+	personId := c.Param("id")
+	criterionId := c.Param("criteriaId")
+	var criterion models.Criterion
+	if err := c.ShouldBindJSON(&criterion); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ungültige Eingabedaten: " + err.Error()})
+		return
+	}
+
+	_, err := h.MongoStore.UpdateCriterionInIpaProject(personId, criterionId, criterion)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Aktualisieren des Kriteriums: " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, criterion)
+}
+
+func (h *Handlers) DeleteIpaCriteriaHandler(c *gin.Context) {
+	personId := c.Param("id")
+	criterionId := c.Param("criteriaId")
+
+	_, err := h.MongoStore.DeleteCriterionFromIpaProject(personId, criterionId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Löschen des Kriteriums: " + err.Error()})
+		return
+	}
+	c.Status(http.StatusNoContent)
+}
+
+func (h *Handlers) UpdatePersonDataHandler(c *gin.Context) {
+	personId := c.Param("id")
+	var personData models.IpaProject
+	if err := c.ShouldBindJSON(&personData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ungültige Eingabedaten: " + err.Error()})
+		return
+	}
+
+	personData.ID = personId // Ensure the ID cannot be changed
+	mongoPersonData, err := personData.Map()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Fehler beim Parsen der ID: " + err.Error()})
+		return
+	}
+
+	_, err = h.MongoStore.UpdateIpaProject(personId, mongoPersonData)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Aktualisieren der Personendaten: " + err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, personData)
+}
+
+func (h *Handlers) GetGradeHandler(c *gin.Context) {
+	project, err := h.getIpaProjectFromRequest(c)
+	if err != nil {
+		return // Error is already handled by helper
+	}
+
+	gradeResult := grade.CalculateGrade(project.Criteria)
+	c.JSON(http.StatusOK, gradeResult)
 }
