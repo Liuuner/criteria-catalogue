@@ -1,31 +1,42 @@
 import {CriterionCard} from './CriterionCard';
-import type {Criterion, CriterionProgress} from "../types.ts";
+import type {Criterion} from "../types.ts";
+import Dialog from "./Dialog.tsx";
+import {useState} from "react";
 
 interface CriteriaListProps {
     criteria: Criterion[];
-    progress: Record<string, CriterionProgress>;
-    onSaveProgress: (criterionId: string, progress: CriterionProgress) => void;
+    onSaveCriterion: (criterion: Criterion) => void;
+    onDeleteCriterion: (id: string) => void;
+    defaultCriteria: Criterion[];
 }
 
-export function CriteriaList({criteria, progress, onSaveProgress}: Readonly<CriteriaListProps>) {
-    if (criteria.length === 0) {
-        return (
-            <div className="text-center py-12 text-slate-500">
-                <p>Keine Kriterien gefunden.</p>
-            </div>
-        );
-    }
+export function CriteriaList({criteria, onSaveCriterion, onDeleteCriterion}: Readonly<CriteriaListProps>) {
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     return (
         <div className="space-y-6">
+            {criteria.length === 0 &&
+                <div className="text-center py-12 text-slate-500">
+                    <p>Keine Kriterien gefunden.</p>
+                </div>
+            }
+
             {criteria.map((criterion) => (
                 <CriterionCard
                     key={criterion.id}
                     criterion={criterion}
-                    progress={progress[criterion.id] || {checkedRequirements: [], notes: ''}}
-                    onSave={(progressData) => onSaveProgress(criterion.id, progressData)}
+                    onSave={onSaveCriterion}
+                    onDelete={onDeleteCriterion}
                 />
             ))}
+
+            <Dialog open={isCreateDialogOpen} onClose={() => setIsCreateDialogOpen(false)} title={"Create Criterion"}>
+                <form action="">
+
+                </form>
+            </Dialog>
+
+            <button onClick={() => setIsCreateDialogOpen(true)}>+</button>
         </div>
     );
 }

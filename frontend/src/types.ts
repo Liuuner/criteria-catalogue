@@ -1,44 +1,49 @@
+export interface IPA extends PersonData {
+    criteria: Criterion[];
+}
+
 export interface PersonData {
-    name: string;
-    vorname: string;
-    thema: string;
-    datum: string;
+    id: string | null;
+    firstname: string;
+    lastname: string;
+    topic: string;
+    date: string;
 }
 
 export interface Criterion {
     id: string;
-    titel: string;
-    leitfrage: string;
-    anforderungen: string[];
-    guterstufen: {
-        "0": Guterstufe;
-        "1": Guterstufe;
-        "2": Guterstufe;
-        "3": Guterstufe;
+    title: string;
+    question: string;
+    requirements: string[];
+    checked: number[]
+    qualityLevels: {
+        "0": QualityLevel;
+        "1": QualityLevel;
+        "2": QualityLevel;
+        "3": QualityLevel;
     };
-}
-
-interface Guterstufe {
-    beschreibung: string;
-    requiredItems: [];
-    requiredTotal: number;
-}
-
-export interface CriterionProgress {
-    checkedRequirements: number[];
     notes: string;
 }
 
-export interface GradeResult {
-    id: string;
-    titel: string;
-    gutestufe: number;
-    checkedCount: number;
-    totalRequirements: number;
+interface QualityLevel {
+    description: string;
+    minRequirements: number;
+    requiredIndexes: number[];
 }
 
 export interface GradesPayload {
-    criteria: GradeResult[];
-    teil1: { note: string; kriterien: GradeResult[] };
-    teil2: { note: string; kriterien: GradeResult[] };
+    part1: GradeDetails;
+    part2: GradeDetails;
+}
+
+export interface GradeDetails {
+    grade: number;
+    averageQualityLevel: number;
+    criterionGrades: CriterionGrade[];
+}
+
+export interface CriterionGrade {
+    criterionId: string;
+    criterionTitle: string;
+    qualityLevel: number;
 }

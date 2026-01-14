@@ -51,18 +51,18 @@ Eine Webanwendung zur Verfolgung und Bewertung von Projekten gemäß den Anforde
 
 ```
 person_data: {
-  name: string,
-  vorname: string,
-  thema: string,
-  datum: string
+  lastname: string,
+  firstname: string,
+  topic: string,
+  date: string
 }
 
 criteria_json: [
   {
     id: string,
-    titel: string,
-    leitfrage: string,
-    anforderungen: string[],
+    title: string,
+    question: string,
+    requirements: string[],
     gutestufen: {
       "0": string,
       "1": string,
@@ -74,7 +74,7 @@ criteria_json: [
 
 criterion_progress_{id}: {
   checkedRequirements: number[],
-  notes: string
+  grades: string
 }
 ```
 

@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {PersonForm} from './components/PersonForm';
 import {CriteriaList} from './components/CriteriaList';
 import {GradesDisplay} from './components/GradesDisplay';
@@ -6,53 +6,53 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from './components/ui/tabs';
 import {Card} from './components/ui/card';
 import {Toaster} from './components/ui/sonner';
 import {toast} from 'sonner';
-import type {Criterion, CriterionProgress, GradeResult, PersonData} from "./types.ts";
-import {getCriteria, getGrades, getPerson, getProgress, savePerson, saveProgress} from "./utils/service/projectApi.ts";
+import type {Criterion, GradesPayload, PersonData} from "./types.ts";
+import {
+    createIpa,
+    deleteCriterion,
+    getAllCriteria, getCriteria,
+    getGrades,
+    getIpa,
+    updateCriterion,
+} from "./utils/service/projectApi.ts";
+import Header from "./components/Header.tsx";
+import Footer from "./components/Footer.tsx";
+import Loader from "./components/Loader.tsx";
+import {IpaLoginForm} from "./components/IpaLoginForm.tsx";
+import Dialog from "./components/Dialog.tsx";
 
 export default function App() {
+    const [ipaId, setIpaId] = useState<string>(localStorage.getItem('ipaId') ?? "");
     const [personData, setPersonData] = useState<PersonData | null>(null);
+    const [defaultCriteria, setDefaultCriteria] = useState<Criterion[]>([])
     const [criteria, setCriteria] = useState<Criterion[]>([]);
-    const [progress, setProgress] = useState<Record<string, CriterionProgress>>({});
-    const [grades, setGrades] = useState<{
-        criteria: GradeResult[];
-        teil1: { note: string; kriterien: GradeResult[] };
-        teil2: { note: string; kriterien: GradeResult[] };
-    } | null>(null);
+    const [grades, setGrades] = useState<GradesPayload | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isIpaIdModal, setIsIpaIdModal] = useState(false);
 
     useEffect(() => {
-        loadData();
+        void loadData(ipaId);
+        void getAllCriteria().then(criteria => setDefaultCriteria(criteria));
     }, []);
 
-    const loadData = async () => {
+    const loadData = async (id: string) => {
         try {
+            if (!id) {
+                return;
+            }
+
             setLoading(true);
 
-            // Personendaten laden
-            const personDataObject = await getPerson()
-            if (personDataObject) {
-                setPersonData(personDataObject);
+            const ipa = await getIpa(id);
+            if (ipa) {
+                setPersonData({...ipa, criteria: null} as PersonData);
+                setCriteria(ipa.criteria)
+
+                await loadGrades(id);
+
+                setIpaId(id)
+                localStorage.setItem('ipaId', id);
             }
-
-            // Kriterien laden
-            const criteriaObject = await getCriteria()
-            if (criteriaObject) {
-                setCriteria(criteriaObject);
-
-                // Fortschritt für jedes Kriterium laden
-                const progressData: Record<string, CriterionProgress> = {};
-                for (const criterion of criteriaObject) {
-                    const progressJson = await getProgress(criterion.id)
-                    if (progressJson) {
-                        progressData[criterion.id] = progressJson;
-                    }
-                }
-                setProgress(progressData);
-            }
-
-            // Noten laden
-            await loadGrades();
-
         } catch (error) {
             console.error('Fehler beim Laden der Daten:', error);
             toast.error('Fehler beim Laden der Daten');
@@ -61,26 +61,31 @@ export default function App() {
         }
     };
 
-    const loadGrades = async () => {
+    const loadGrades = async (id: string) => {
         try {
-            const criteria = await getGrades();
-            if (criteria) {
-                setGrades(criteria);
+            const grades = await getGrades(id);
+            if (grades) {
+                setGrades(grades);
             }
         } catch (error) {
             console.error('Fehler beim Laden der Noten:', error);
         }
     };
 
-    const savePersonMethod = async (data: PersonData) => {
+    const createIpaMethod = async (data: PersonData) => {
         try {
-            const result = await savePerson(data)
+            if (data.firstname && data.lastname && data.topic && data.date) {
+                const result = await createIpa(data)
 
-            if (result.success) {
-                setPersonData(data);
-                toast.success('Personendaten gespeichert');
-            } else {
-                toast.error(result.error || 'Fehler beim Speichern');
+                if (result) {
+                    setPersonData({...result, criteria: null} as PersonData);
+                    setCriteria(result.criteria);
+                    setIpaId(result.id ?? "");
+                    setIsIpaIdModal(true);
+                    toast.success(`IPA Daten gespeichert - Ihre IPA-ID ist: ${result.id}`);
+                } else {
+                    toast.error('Fehler beim Speichern');
+                }
             }
         } catch (error) {
             console.error('Fehler beim Speichern der Personendaten:', error);
@@ -88,61 +93,89 @@ export default function App() {
         }
     };
 
-    const saveProgressMethod = async (criterionId: string, progressData: CriterionProgress) => {
+    const ipaLogin = async (ipaIdLogin: string) => {
         try {
-            const result = await saveProgress(criterionId, progressData)
+            await loadData(ipaIdLogin);
+        } catch (error) {
+            console.error('Fehler beim Login:', error);
+            toast.error('Fehler beim Login');
+        }
+    }
 
-            if (result.success) {
-                setProgress(prev => ({...prev, [criterionId]: progressData}));
+    const logout = () => {
+        setPersonData(null);
+        localStorage.removeItem('ipaId');
+        setIpaId("");
+    }
+
+    const updateCriterionMethod = async (criterion: Criterion) => {
+        try {
+            if (!personData?.id) {
+                return;
+            }
+            const result = await updateCriterion(personData?.id, criterion.id, criterion)
+
+            if (result) {
+                setCriteria(prev => prev.map(c => c.id === criterion.id ? result : c));
                 toast.success('Fortschritt gespeichert');
 
-                // Noten neu berechnen
-                await loadGrades();
-            } else {
-                toast.error(result.error || 'Fehler beim Speichern');
+                await loadGrades(ipaId);
             }
+
         } catch (error) {
             console.error('Fehler beim Speichern des Fortschritts:', error);
             toast.error('Fehler beim Speichern des Fortschritts');
         }
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div
-                        className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-                    <p className="mt-4 text-slate-600">Lade Daten...</p>
-                </div>
-            </div>
-        );
+    const deleteCriterionMethod = async (criterionId: string) => {
+        try {
+            await deleteCriterion(ipaId, criterionId).then(() => {
+                void getCriteria(ipaId).then(criteria => setCriteria(criteria))
+            })
+        } catch (error) {
+            console.error('Fehler beim löschen des Kriteriums:', error);
+            toast.error('Fehler beim löschen des Kriteriums');
+        }
     }
 
-    return (
+    return loading ? <Loader/> : (
         <div className="min-h-screen bg-slate-50">
             <Toaster/>
 
-            <header className="bg-white border-b border-slate-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <h1 className="text-slate-900">Projekt Bewertung - Modul 324 & 450</h1>
-                    <p className="text-slate-600 mt-2">Verfolgen Sie Ihren Projektfortschritt und berechnen Sie Ihre
-                        Note</p>
-                </div>
-            </header>
+            <Header/>
+
+            <Dialog open={isIpaIdModal} onClose={() => setIsIpaIdModal(false)} title={"IPA-ID"}>
+                <p><b>Bitte Merke dir diese ID, sie ist dein "Login".</b></p>
+                <br/>
+                <h3>ID: <b className={"text-red-600"}>{ipaId}</b></h3>
+            </Dialog>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <Tabs defaultValue="person" className="space-y-6">
                     <TabsList className="bg-white border border-slate-200">
                         <TabsTrigger value="person">Personendaten</TabsTrigger>
-                        <TabsTrigger value="criteria">Kriterien erfassen</TabsTrigger>
-                        <TabsTrigger value="grades">Notenberechnung</TabsTrigger>
+                        {!ipaId &&
+                            <TabsTrigger value="login">IPA Login</TabsTrigger>
+                        }
+                        {ipaId && <>
+                            <TabsTrigger value="criteria">Kriterien erfassen</TabsTrigger>
+                            <TabsTrigger value="grades">Notenberechnung</TabsTrigger>
+                        </>}
                     </TabsList>
 
                     <TabsContent value="person">
                         <Card className="p-6">
-                            <h2 className="mb-6">Personendaten erfassen</h2>
-                            <PersonForm initialData={personData} onSave={savePersonMethod}/>
+                            <h2>Personendaten erfassen</h2>
+                            {ipaId && <h3>IPA-ID: <b className={"text-red-600"}>{ipaId}</b></h3>}
+                            <PersonForm initialData={personData} onSave={createIpaMethod} logout={logout}/>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="login">
+                        <Card className="p-6">
+                            <h2 className="mb-6">IPA Login</h2>
+                            <IpaLoginForm onSave={ipaLogin}/>
                         </Card>
                     </TabsContent>
 
@@ -151,8 +184,9 @@ export default function App() {
                             <h2 className="mb-6">Kriterien und Fortschritt</h2>
                             <CriteriaList
                                 criteria={criteria}
-                                progress={progress}
-                                onSaveProgress={saveProgressMethod}
+                                onSaveCriterion={updateCriterionMethod}
+                                onDeleteCriterion={deleteCriterionMethod}
+                                defaultCriteria={defaultCriteria}
                             />
                         </Card>
                     </TabsContent>
@@ -162,9 +196,9 @@ export default function App() {
                             <h2 className="mb-6">Mutmassliche Note</h2>
                             {personData && (
                                 <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                                    <p><strong>Name:</strong> {personData.vorname} {personData.name}</p>
-                                    <p><strong>Thema:</strong> {personData.thema}</p>
-                                    <p><strong>Abgabedatum:</strong> {personData.datum}</p>
+                                    <p><strong>Name:</strong> {personData.firstname} {personData.lastname}</p>
+                                    <p><strong>Thema:</strong> {personData.topic}</p>
+                                    <p><strong>Abgabedatum:</strong> {personData.date}</p>
                                 </div>
                             )}
                             <GradesDisplay grades={grades}/>
@@ -173,11 +207,7 @@ export default function App() {
                 </Tabs>
             </main>
 
-            <footer className="bg-white border-t border-slate-200 mt-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-slate-500">
-                    <p>Projekt Bewertungssystem für Modul 324 (DevOps) und Modul 450 (Testing)</p>
-                </div>
-            </footer>
+            <Footer/>
         </div>
     );
 }

@@ -1,89 +1,112 @@
 import {useState, useEffect, type FormEvent, type ChangeEvent} from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+import {Button} from './ui/button';
+import {Input} from './ui/input';
+import {Label} from './ui/label';
 import type {PersonData} from "../types.ts";
 
 interface PersonFormProps {
-  initialData: PersonData | null;
-  onSave: (data: PersonData) => void;
+    initialData: PersonData | null;
+    onSave: (data: PersonData) => void;
+    logout: () => void;
 }
 
-export function PersonForm({ initialData, onSave }: Readonly<PersonFormProps>) {
-  const [formData, setFormData] = useState<PersonData>({
-    name: '',
-    vorname: '',
-    thema: '',
-    datum: ''
-  });
+const defaultFormData = {
+    id: null,
+    firstname: '',
+    lastname: '',
+    topic: '',
+    date: ''
+}
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    }
-  }, [initialData]);
+export function PersonForm({initialData, onSave, logout}: Readonly<PersonFormProps>) {
+    const [formData, setFormData] = useState<PersonData>(defaultFormData);
 
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
+    useEffect(() => {
+        if (initialData) {
+            setFormData(initialData);
+        }
+    }, [initialData]);
 
-  const handleChange = (field: keyof PersonData) => (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, [field]: e.target.value }));
-  };
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-      <div className="space-y-2">
-        <Label htmlFor="vorname">Vorname *</Label>
-        <Input
-          id="vorname"
-          type="text"
-          value={formData.vorname}
-          onChange={handleChange('vorname')}
-          required
-          placeholder="Max"
-        />
-      </div>
+    const handleChange = (field: keyof PersonData) => (e: ChangeEvent<HTMLInputElement>) => {
+        setFormData(prev => ({...prev, [field]: e.target.value}));
+    };
 
-      <div className="space-y-2">
-        <Label htmlFor="name">Name *</Label>
-        <Input
-          id="name"
-          type="text"
-          value={formData.name}
-          onChange={handleChange('name')}
-          required
-          placeholder="Mustermann"
-        />
-      </div>
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+            {initialData !== null && (
+                <Button onClick={() => {
+                    logout();
+                    setFormData(defaultFormData);
+                }} variant={"destructive"} type={"button"} >
+                    Logout
+                </Button>
+            )}
 
-      <div className="space-y-2">
-        <Label htmlFor="thema">Thema der Arbeit *</Label>
-        <Input
-          id="thema"
-          type="text"
-          value={formData.thema}
-          onChange={handleChange('thema')}
-          required
-          placeholder="z.B. Webapplikation für Projektbewertung"
-        />
-      </div>
+            <div className="space-y-2">
+                <Label htmlFor="firstname">Vorname *</Label>
+                <Input
+                    className={"bg-[#F3F3F5]!"}
+                    id="firstname"
+                    type="text"
+                    value={formData.firstname}
+                    onChange={handleChange('firstname')}
+                    required
+                    placeholder="Max"
+                    disabled={initialData !== null}
+                />
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="datum">Datum der Abgabe *</Label>
-        <Input
-          id="datum"
-          type="date"
-          value={formData.datum}
-          onChange={handleChange('datum')}
-          required
-        />
-      </div>
+            <div className="space-y-2">
+                <Label htmlFor="lastname">Name *</Label>
+                <Input
+                    className={"bg-[#F3F3F5]!"}
+                    id="lastname"
+                    type="text"
+                    value={formData.lastname}
+                    onChange={handleChange('lastname')}
+                    required
+                    placeholder="Mustermann"
+                    disabled={initialData !== null}
+                />
+            </div>
 
-      <Button type="submit" className="w-full sm:w-auto">
-        Personendaten speichern
-      </Button>
-    </form>
-  );
+            <div className="space-y-2">
+                <Label htmlFor="topic">Thema der Arbeit *</Label>
+                <Input
+                    className={"bg-[#F3F3F5]!"}
+                    id="topic"
+                    type="text"
+                    value={formData.topic}
+                    onChange={handleChange('topic')}
+                    required
+                    placeholder="z.B. Webapplikation für Projektbewertung"
+                    disabled={initialData !== null}
+                />
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="date">Datum der Abgabe *</Label>
+                <Input
+                    className={"bg-[#F3F3F5]!"}
+                    id="date"
+                    type="date"
+                    value={formData.date}
+                    onChange={handleChange('date')}
+                    required
+                    disabled={initialData !== null}
+                />
+            </div>
+
+            {initialData === null && (
+                <Button type="submit" className="w-full sm:w-auto">
+                    Personendaten speichern
+                </Button>
+            )}
+        </form>
+    );
 }
