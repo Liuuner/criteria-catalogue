@@ -6,9 +6,13 @@ import (
 	"github.com/Liuuner/criteria-catalogue/backend/internal/api"
 	"github.com/Liuuner/criteria-catalogue/backend/internal/common"
 	"github.com/Liuuner/criteria-catalogue/backend/internal/store"
+	"github.com/gin-gonic/gin"
 )
 
+var version = "dev"
+
 func main() {
+	log.Printf("Version: %s", version)
 	cfg, err := common.LoadConfig()
 	if err != nil {
 		log.Fatalf("Fehler beim Laden der Konfiguration: %v", err)
@@ -33,8 +37,10 @@ func main() {
 		MongoStore: mongoStore,
 	}
 
+	router := gin.Default()
+
 	// Richte den Router ein
-	router := api.SetupRouter(handlers)
+	api.SetupRouter(router, handlers)
 
 	// Starte den Server
 	log.Printf("Server wird auf Port %d gestartet...", cfg.ServerPort)

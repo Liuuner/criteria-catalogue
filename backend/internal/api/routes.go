@@ -6,9 +6,7 @@ import (
 )
 
 // SetupRouter konfiguriert die Routen für die API.
-func SetupRouter(h *Handlers) *gin.Engine {
-	r := gin.Default()
-
+func SetupRouter(r *gin.Engine, h *Handlers) {
 	// CORS-Middleware für die Kommunikation mit dem Frontend
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"*"} // Passe den Port ggf. an
@@ -31,6 +29,4 @@ func SetupRouter(h *Handlers) *gin.Engine {
 
 		api.GET("/criteria", h.GetPredefinedCriteriaHandler) // Holt alle verfügbaren Kriterien aus der JSON-Datei
 	}
-
-	return r
 }

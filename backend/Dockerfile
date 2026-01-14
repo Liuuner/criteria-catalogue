@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.20-alpine AS builder
 
 LABEL authors="liun"
 
@@ -9,8 +9,8 @@ RUN go mod download
 
 COPY . .
 
-# This CGO important to run in a minimal image like scratch
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app/main ./cmd/server
+ARG VERSION=dev
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags "-X main.version=${VERSION}" -o /app/main ./cmd/server
 
 
 FROM scratch
@@ -18,6 +18,7 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /app/main .
+COPY --from=builder /app/static ./static
 
 COPY criteria.json .
 
