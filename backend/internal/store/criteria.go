@@ -3,7 +3,6 @@ package store
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/Liuuner/criteria-catalogue/backend/internal/common"
@@ -33,19 +32,15 @@ func NewCriteriaStore(cfg common.Config) (*CriteriaStore, error) {
 	}
 
 	for _, criterion := range rawCriteria {
-		log.Printf("criterion before: %+v\n\n", criterion)
 		err := models.SetCriterionDefaultValuesIfMissing(&criterion)
 		if err != nil {
 			return nil, err
 		}
-		log.Printf("criterion after: %+v\n\n", criterion)
 		s.AllCriteria = append(s.AllCriteria, criterion)
 		if common.IsMandatoryCriterion(criterion.ID) {
 			s.MandatoryCriteria = append(s.MandatoryCriteria, criterion)
 		}
 	}
-
-	log.Printf("all criteria after: %+v\n\n", s.AllCriteria)
 
 	return s, nil
 }
