@@ -38,7 +38,7 @@ export interface GradesPayload {
 
 export interface GradeDetails {
     grade: number;
-    averageQualityLevel: number
+    averageQualityLevel: number;
     criterionGrades: CriterionGrade[];
 }
 

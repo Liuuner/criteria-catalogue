@@ -11,7 +11,7 @@ interface CriteriaListProps {
 }
 
 export function CriteriaList({criteria, onSaveCriterion, onDeleteCriterion}: Readonly<CriteriaListProps>) {
-    const [isCreatDialogOpen, setIsCreatDialogOpen] = useState(false);
+    const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     return (
         <div className="space-y-6">
@@ -30,13 +30,13 @@ export function CriteriaList({criteria, onSaveCriterion, onDeleteCriterion}: Rea
                 />
             ))}
 
-            <Dialog open={isCreatDialogOpen} onClose={() => setIsCreatDialogOpen(false)} title={"Create Criterion"}>
+            <Dialog open={isCreateDialogOpen} onClose={() => setIsCreateDialogOpen(false)} title={"Create Criterion"}>
                 <form action="">
 
                 </form>
             </Dialog>
 
-            <button onClick={() => setIsCreatDialogOpen(true)}>+</button>
+            <button onClick={() => setIsCreateDialogOpen(true)}>+</button>
         </div>
     );
 }

@@ -44,16 +44,16 @@ export async function createCriterion(id: string, criterion: Criterion): Promise
     });
 }
 
-export async function updateCriterion(IpaId: string, criterionId: string, data: Partial<IPA>): Promise<Criterion | null> {
-    return await fetchJson<Criterion>(`${API_BASE}/api/ipa/${IpaId}/criteria/${criterionId}`, {
+export async function updateCriterion(ipaId: string, criterionId: string, data: Criterion): Promise<Criterion | null> {
+    return await fetchJson<Criterion>(`${API_BASE}/api/ipa/${ipaId}/criteria/${criterionId}`, {
         method: "PUT",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),
     });
 }
 
-export async function deleteCriterion(IpaId: string, criterionId: string): Promise<void> {
-    await fetchJson<unknown>(`${API_BASE}/api/ipa/${IpaId}/criteria/${criterionId}`, {
+export async function deleteCriterion(ipaId: string, criterionId: string): Promise<void> {
+    await fetchJson<unknown>(`${API_BASE}/api/ipa/${ipaId}/criteria/${criterionId}`, {
         method: "DELETE",
     });
 }

@@ -44,7 +44,7 @@ export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionC
 
     const handleDelete = () => {
         onDelete(criterion.id);
-    }
+    };
 
     const calculateQualityLevel = () => {
         const total = criterion.requirements.length;

@@ -74,7 +74,7 @@ export default function App() {
 
     const createIpaMethod = async (data: PersonData) => {
         try {
-            if (data.id) {
+            if (data.firstname && data.lastname && data.topic && data.date) {
                 const result = await createIpa(data)
 
                 if (result) {
@@ -108,7 +108,7 @@ export default function App() {
         setIpaId("");
     }
 
-    const saveCriterionMethod = async (criterion: Criterion) => {
+    const updateCriterionMethod = async (criterion: Criterion) => {
         try {
             if (!personData?.id) {
                 return;
@@ -184,7 +184,7 @@ export default function App() {
                             <h2 className="mb-6">Kriterien und Fortschritt</h2>
                             <CriteriaList
                                 criteria={criteria}
-                                onSaveCriterion={saveCriterionMethod}
+                                onSaveCriterion={updateCriterionMethod}
                                 onDeleteCriterion={deleteCriterionMethod}
                                 defaultCriteria={defaultCriteria}
                             />

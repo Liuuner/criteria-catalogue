@@ -7,7 +7,6 @@ interface GradesDisplayProps {
 }
 
 export function GradesDisplay({grades}: Readonly<GradesDisplayProps>) {
-    console.log(grades)
     if (!grades) {
         return (
             <div className="text-center py-12 text-slate-500">
