@@ -39,7 +39,7 @@ jobs:
       uses: docker/setup-buildx-action@v2
 
     - name: lowercase repo
-      id: lowercase-repo
+      id: lowercase
       run: |
         echo "REPO=${GITHUB_REPOSITORY@L}" >> "${GITHUB_ENV}"
 
