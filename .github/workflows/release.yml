@@ -56,8 +56,8 @@ jobs:
         context: ./backend
         push: true
         tags: |
-          ghcr.io/${{ steps.lowercase-repo.outputs.repo }}:${{ github.event.inputs.commit }}
-          ghcr.io/${{ steps.lowercase-repo.outputs.repo }}:latest
+          ghcr.io/${{ steps.lowercase.outputs.repo }}:${{ github.event.inputs.commit }}
+          ghcr.io/${{ steps.lowercase.outputs.repo }}:latest
         build-args: |
           VERSION=${{ github.event.inputs.commit }}
 
