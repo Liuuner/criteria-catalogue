@@ -18,7 +18,7 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /app/main .
-COPY --from=builder /app/static ./static
+COPY static ./static
 
 COPY criteria.json .
 

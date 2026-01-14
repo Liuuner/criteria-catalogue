@@ -67,19 +67,13 @@ type Criterion struct {
 	Requirements  []string                `json:"requirements"`
 	Checked       []int                   `json:"checked"`
 	QualityLevels map[string]QualityLevel `json:"qualityLevels"`
+	Notes         string                  `json:"notes"`
 }
 
 type QualityLevel struct {
 	Description     string `json:"description"`
 	MinRequirements int    `json:"minRequirements"`
 	RequiredIndexes []int  `json:"requiredIndexes"`
-}
-
-// Progress speichert den Fortschritt für ein Kriterium.
-type Progress struct {
-	CriterionID         string `json:"criterionId"`
-	CheckedRequirements []int  `json:"checkedRequirements"`
-	Notes               string `json:"notes"`
 }
 
 // GradeResult enthält die berechneten Noten und Gütestufen.

@@ -1,70 +1,69 @@
-import {projectId, publicAnonKey} from "../supabase/info.tsx";
-import type {Criterion, CriterionProgress, GradesPayload, PersonData} from "../../types.ts";
+import type {Criterion, GradesPayload, IPA, PersonData} from "../../types.ts";
 
-const API_BASE = `https://${projectId}.supabase.co/functions/v1/make-server-e2bf8d92`;
+const API_BASE = import.meta.env.VITE_API_URL;
 
-type ApiOk<T> = { data?: T; success?: true };
-type ApiError = { error?: string; success?: false };
-
-async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
+async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T | null> {
     const res = await fetch(input, {
         ...init,
         headers: {
-            Authorization: `Bearer ${publicAnonKey}`,
-            ...(init?.headers ?? {}),
+            ...init?.headers,
         },
     });
 
-    // falls Supabase Function mal kein JSON liefert:
     const text = await res.text();
-    try {
+    if (text) {
         return JSON.parse(text) as T;
-    } catch {
-        throw new Error(`Ungültige API-Antwort (${res.status}): ${text}`);
     }
+    return null;
 }
 
-export async function getPerson(): Promise<PersonData | null> {
-    const json = await fetchJson<ApiOk<PersonData> & ApiError>(`${API_BASE}/person`);
-    return json.data ?? null;
+export async function getIpa(id: string): Promise<IPA | null> {
+    const json = await fetchJson<IPA>(`${API_BASE}/api/ipa/${id}`);
+    return json ?? null;
 }
 
-export async function savePerson(data: PersonData): Promise<{ success: boolean; error?: string }> {
-    const json = await fetchJson<ApiOk<unknown> & ApiError>(`${API_BASE}/person`, {
+export async function createIpa(personData: PersonData): Promise<IPA | null> {
+    const json = await fetchJson<IPA>(`${API_BASE}/api/ipa`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(personData),
+    });
+    return json ?? null;
+}
+
+export async function getCriteria(id: string): Promise<Criterion[]> {
+    const json = await fetchJson<Criterion[]>(`${API_BASE}/api/ipa/${id}/criteria`);
+    return json ?? [];
+}
+
+export async function createCriterion(id: string, criterion: Criterion): Promise<Criterion | null> {
+    return await fetchJson<Criterion>(`${API_BASE}/api/ipa/${id}/criteria`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(criterion),
+    });
+}
+
+export async function updateCriterion(IpaId: string, criterionId: string, data: Partial<IPA>): Promise<Criterion | null> {
+    return await fetchJson<Criterion>(`${API_BASE}/api/ipa/${IpaId}/criteria/${criterionId}`, {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(data),
     });
-    return { success: !!json.success, error: json.error };
 }
 
-export async function getCriteria(): Promise<Criterion[]> {
-    const json = await fetchJson<ApiOk<Criterion[]> & ApiError>(`${API_BASE}/criteria`);
-    return json.data ?? [];
-}
-
-export async function getProgress(criterionId: string): Promise<CriterionProgress | null> {
-    const json = await fetchJson<ApiOk<CriterionProgress> & ApiError>(
-        `${API_BASE}/progress/${criterionId}`
-    );
-    return json.data ?? null;
-}
-
-export async function saveProgress(
-    criterionId: string,
-    progress: CriterionProgress
-): Promise<{ success: boolean; error?: string }> {
-    const json = await fetchJson<ApiOk<unknown> & ApiError>(`${API_BASE}/progress`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ criterionId, ...progress }),
+export async function deleteCriterion(IpaId: string, criterionId: string): Promise<void> {
+    await fetchJson<unknown>(`${API_BASE}/api/ipa/${IpaId}/criteria/${criterionId}`, {
+        method: "DELETE",
     });
-    return { success: !!json.success, error: json.error };
 }
 
-export async function getGrades(): Promise<GradesPayload | null> {
-    // dein Endpoint liefert offenbar direkt {criteria, teil1, teil2}
-    const json = await fetchJson<Partial<GradesPayload> & ApiError>(`${API_BASE}/grades`);
-    if (json && Array.isArray((json as any).criteria)) return json as GradesPayload;
-    return null;
+export async function getGrades(id: string): Promise<GradesPayload | null> {
+    const json = await fetchJson<GradesPayload>(`${API_BASE}/api/ipa/${id}/grade`);
+    return json ?? null;
+}
+
+export async function getAllCriteria(): Promise<Criterion[]> {
+    const json = await fetchJson<Criterion[]>(`${API_BASE}/api/criteria`);
+    return json ?? [];
 }

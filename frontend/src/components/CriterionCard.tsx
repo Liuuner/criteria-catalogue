@@ -1,135 +1,174 @@
 import {useState, useEffect, type ChangeEvent} from 'react';
-// TODO fix typing with new structure
-import type {Criterion, CriterionProgress} from '../App';
-import { Card } from './ui/card';
-import { Checkbox } from './ui/checkbox';
-import { Textarea } from './ui/textarea';
-import { Button } from './ui/button';
-import { Label } from './ui/label';
-import { Badge } from './ui/badge';
+import {Card} from './ui/card';
+import {Checkbox} from './ui/checkbox';
+import {Textarea} from './ui/textarea';
+import {Button} from './ui/button';
+import {Label} from './ui/label';
+import {Badge} from './ui/badge';
+import type {Criterion} from "../types.ts";
 
 interface CriterionCardProps {
-  criterion: Criterion;
-  progress: CriterionProgress;
-  onSave: (progress: CriterionProgress) => void;
+    criterion: Criterion;
+    onSave: (progress: Criterion) => void;
+    onDelete: (id: string) => void;
 }
 
-export function CriterionCard({ criterion, progress, onSave }: Readonly<CriterionCardProps>) {
-  const [checkedRequirements, setCheckedRequirements] = useState<number[]>(progress.checkedRequirements);
-  const [notes, setNotes] = useState<string>(progress.notes);
-  const [hasChanges, setHasChanges] = useState(false);
+export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionCardProps>) {
+    const [checkedRequirements, setCheckedRequirements] = useState<number[]>(criterion.checked);
+    const [notes, setNotes] = useState<string>(criterion.notes);
+    const [hasChanges, setHasChanges] = useState(false);
 
-  useEffect(() => {
-    setCheckedRequirements(progress.checkedRequirements);
-    setNotes(progress.notes);
-    setHasChanges(false);
-  }, [progress]);
+    useEffect(() => {
+        setCheckedRequirements(criterion.checked);
+        setNotes(criterion.notes);
+        setHasChanges(false);
+    }, [criterion]);
 
-  const handleCheckChange = (index: number, checked: boolean) => {
-    const newChecked = checked
-      ? [...checkedRequirements, index]
-      : checkedRequirements.filter(i => i !== index);
-    setCheckedRequirements(newChecked);
-    setHasChanges(true);
-  };
+    const handleCheckChange = (index: number, checked: boolean) => {
+        const newChecked = checked
+            ? [...checkedRequirements, index]
+            : checkedRequirements.filter(i => i !== index);
+        setCheckedRequirements(newChecked);
+        setHasChanges(true);
+    };
 
-  const handleNotesChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setNotes(e.target.value);
-    setHasChanges(true);
-  };
+    const handleNotesChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+        setNotes(e.target.value);
+        setHasChanges(true);
+    };
 
-  const handleSave = () => {
-    onSave({ checkedRequirements, notes });
-    setHasChanges(false);
-  };
+    const handleSave = () => {
+        onSave({...criterion, checked: checkedRequirements, notes});
+        setHasChanges(false);
+    };
 
-  const calculateGutestufe = () => {
-    const total = criterion.anforderungen.length;
-    const checked = checkedRequirements.length;
+    const handleDelete = () => {
+        onDelete(criterion.id);
+    }
 
-    if (checked === total) return 3;
-    if (checked >= 4) return 2;
-    if (checked >= 2) return 1;
-    return 0;
-  };
+    const calculateQualityLevel = () => {
+        const total = criterion.requirements.length;
+        const checked = checkedRequirements.length;
 
-  const gutestufe = calculateGutestufe();
-  const gutestufeColors = {
-    0: 'bg-red-100 text-red-800 border-red-200',
-    1: 'bg-orange-100 text-orange-800 border-orange-200',
-    2: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    3: 'bg-green-100 text-green-800 border-green-200'
-  };
+        if (checked === 0) {
+            return 0;
+        } else if (checked === total) {
+            return 3;
+        } else if (criterion
+                .qualityLevels["2"]
+                .requiredIndexes
+                .every(index => checkedRequirements.includes(index))
+            && criterion
+                .qualityLevels["2"]
+                .minRequirements <= checked
+        ) {
+            return 2;
+        } else if (criterion
+                .qualityLevels["1"]
+                .requiredIndexes
+                .every(index => checkedRequirements.includes(index))
+            && criterion
+                .qualityLevels["1"]
+                .minRequirements <= checked
+        ) {
+            return 1;
+        } else {
+            return 0;
+        }
+    };
 
-  return (
-    <Card className="p-6 border-l-4 border-l-blue-500">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <Badge variant="outline" className="font-mono">{criterion.id}</Badge>
-            <h3>{criterion.titel}</h3>
-          </div>
-          <p className="text-slate-600 italic">{criterion.leitfrage}</p>
-        </div>
-        <Badge className={gutestufeColors[gutestufe]}>
-          Gütestufe {gutestufe}
-        </Badge>
-      </div>
+    const currentQualityLevel = calculateQualityLevel();
+    const qualityLevelColors = {
+        0: 'bg-red-100 text-red-800 border-red-200',
+        1: 'bg-orange-100 text-orange-800 border-orange-200',
+        2: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+        3: 'bg-green-100 text-green-800 border-green-200'
+    };
 
-      <div className="mb-4">
-        <Label className="mb-3 block">Anforderungen ({checkedRequirements.length} von {criterion.anforderungen.length} erfüllt)</Label>
-        <div className="space-y-3">
-          {criterion.anforderungen.map((anforderung, index) => (
-            <div key={anforderung} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
-              <Checkbox
-                id={`${criterion.id}-req-${index}`}
-                checked={checkedRequirements.includes(index)}
-                onCheckedChange={(checked) => handleCheckChange(index, checked as boolean)}
-              />
-              <label
-                htmlFor={`${criterion.id}-req-${index}`}
-                className="flex-1 cursor-pointer text-slate-700"
-              >
-                {anforderung}
-              </label>
+    return (
+        <Card className="p-6 border-l-4 border-l-blue-500">
+            <div className="flex items-start justify-between mb-4">
+                <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                        <Badge variant="outline" className="font-mono">{criterion.id}</Badge>
+                        <h3>{criterion.title}</h3>
+                    </div>
+                    <p className="text-slate-600 italic">{criterion.question}</p>
+                </div>
+                <Badge className={qualityLevelColors[currentQualityLevel]}>
+                    Gütestufe {currentQualityLevel}
+                </Badge>
             </div>
-          ))}
-        </div>
-      </div>
 
-      <div className="mb-4">
-        <Label htmlFor={`${criterion.id}-notes`} className="mb-2 block">
-          Notizen (Was fehlt noch?)
-        </Label>
-        <Textarea
-          id={`${criterion.id}-notes`}
-          value={notes}
-          onChange={handleNotesChange}
-          placeholder="Fügen Sie hier Ihre Notizen hinzu..."
-          rows={3}
-          className="resize-none"
-        />
-      </div>
+            <div className="mb-4">
+                <Label className="mb-3 block">Anforderungen
+                    ({checkedRequirements.length} von {criterion.requirements.length} erfüllt)</Label>
+                <div className="space-y-3">
+                    {criterion.requirements.map((requirement, index) => (
+                        <div key={requirement}
+                             className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                            <Checkbox
+                                id={`${criterion.id}-req-${index}`}
+                                checked={checkedRequirements.includes(index)}
+                                onCheckedChange={(checked) => handleCheckChange(index, checked as boolean)}
+                            />
+                            <label
+                                htmlFor={`${criterion.id}-req-${index}`}
+                                className="flex-1 cursor-pointer text-slate-700"
+                            >
+                                {requirement}
+                            </label>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-slate-200">
-        <div className="text-slate-600">
-          <p className="mb-1">Gütestufen:</p>
-          <div className="space-y-1">
-            {Object.entries(criterion.gutestufen).sort((a, b) => Number(b[0]) - Number(a[0])).map(([stufe, beschreibung]) => (
-              <p key={stufe} className={`${stufe === String(gutestufe) ? 'font-semibold text-slate-900' : ''}`}>
-                {stufe}: {beschreibung}
-              </p>
-            ))}
-          </div>
-        </div>
-        <Button
-          onClick={handleSave}
-          disabled={!hasChanges}
-          variant={hasChanges ? "default" : "outline"}
-        >
-          {hasChanges ? 'Speichern' : 'Gespeichert'}
-        </Button>
-      </div>
-    </Card>
-  );
+            <div className="mb-4">
+                <Label htmlFor={`${criterion.id}-notes`} className="mb-2 block">
+                    Notizen (Was fehlt noch?)
+                </Label>
+                <Textarea
+                    id={`${criterion.id}-notes`}
+                    value={notes}
+                    onChange={handleNotesChange}
+                    placeholder="Fügen Sie hier Ihre Notizen hinzu..."
+                    rows={3}
+                    className="resize-none bg-[#F3F3F5]!"
+                />
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                <div className="text-slate-600">
+                    <p className="mb-1">Gütestufen:</p>
+                    <div className="space-y-1">
+                        <p className={`${3 === currentQualityLevel ? 'font-semibold text-slate-900' : ''}`}>
+                            3: alle Punkte erfüllt
+                        </p>
+                        {Object.entries(criterion.qualityLevels).sort((a, b) => Number(b[0]) - Number(a[0])).map(([level, qualityLevel]) => (
+                            <p key={level}
+                               className={`${level === String(currentQualityLevel) ? 'font-semibold text-slate-900' : ''}`}>
+                                {level}: {qualityLevel.description}
+                            </p>
+                        ))}
+                    </div>
+                </div>
+               <div className="flex gap-3">
+                   <Button
+                       onClick={handleDelete}
+                       variant={"destructive"}
+                   >
+                       Löschen
+                   </Button>
+
+                   <Button
+                       onClick={handleSave}
+                       disabled={!hasChanges}
+                       variant={"default"}
+                   >
+                       Speichern
+                   </Button>
+               </div>
+            </div>
+        </Card>
+    );
 }
