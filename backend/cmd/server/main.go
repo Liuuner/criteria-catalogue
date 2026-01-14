@@ -2,10 +2,12 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/Liuuner/criteria-catalogue/backend/internal/api"
 	"github.com/Liuuner/criteria-catalogue/backend/internal/common"
 	"github.com/Liuuner/criteria-catalogue/backend/internal/store"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,8 +41,14 @@ func main() {
 
 	router := gin.Default()
 
+	router.GET("/version", func(c *gin.Context) {
+		c.String(http.StatusOK, version)
+	})
+
 	// Richte den Router ein
 	api.SetupRouter(router, handlers)
+
+	router.NoRoute(static.Serve("/", static.LocalFile("./static", true)))
 
 	// Starte den Server
 	log.Printf("Server wird auf Port %d gestartet...", cfg.ServerPort)
