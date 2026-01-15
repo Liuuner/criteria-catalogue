@@ -1,4 +1,5 @@
 import type {Criterion, GradesPayload, IPA, PersonData} from "../../types.ts";
+import {toast} from "sonner";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
@@ -11,15 +12,19 @@ async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T |
     });
 
     const text = await res.text();
-    if (text) {
+
+    const returnData = JSON.parse(text)
+    if (returnData && returnData?.error === undefined) {
         return JSON.parse(text) as T;
+    } else {
+        toast.error(returnData.error);
     }
     return null;
 }
 
 export async function getIpa(id: string): Promise<IPA | null> {
     const json = await fetchJson<IPA>(`${API_BASE}/api/ipa/${id}`);
-    return json ?? null;
+    return json && json.id !== "AA00" ? json : null;
 }
 
 export async function createIpa(personData: PersonData): Promise<IPA | null> {
@@ -66,4 +71,9 @@ export async function getGrades(id: string): Promise<GradesPayload | null> {
 export async function getAllCriteria(): Promise<Criterion[]> {
     const json = await fetchJson<Criterion[]>(`${API_BASE}/api/criteria`);
     return json ?? [];
+}
+
+export async function getVersions(): Promise<string> {
+    const json = await fetchJson<string>(`${API_BASE}/version`);
+    return json ?? "";
 }

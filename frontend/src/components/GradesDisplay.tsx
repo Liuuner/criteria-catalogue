@@ -33,7 +33,7 @@ export function GradesDisplay({grades}: Readonly<GradesDisplayProps>) {
             {/* Gesamtübersicht */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="p-6 bg-linear-to-br from-blue-50 to-blue-100 border-blue-200">
-                    <h3 className="mb-2 text-blue-900">Teil 1: Umsetzung</h3>
+                    <h3 className="mb-2 text-blue-900"><b>Teil 1: Umsetzung</b></h3>
                     <div className={`text-5xl mb-2 ${getGradeColor(grades.part1.grade)}`}>
                         {grades.part1.grade}
                     </div>
@@ -43,7 +43,7 @@ export function GradesDisplay({grades}: Readonly<GradesDisplayProps>) {
                 </Card>
 
                 <Card className="p-6 bg-linear-to-br from-purple-50 to-purple-100 border-purple-200">
-                    <h3 className="mb-2 text-purple-900">Teil 2: Dokumentation</h3>
+                    <h3 className="mb-2 text-purple-900"><b>Teil 2: Dokumentation</b></h3>
                     <div className={`text-5xl mb-2 ${getGradeColor(grades.part2.grade)}`}>
                         {grades.part2.grade}
                     </div>
@@ -55,7 +55,7 @@ export function GradesDisplay({grades}: Readonly<GradesDisplayProps>) {
 
             {/* Details Teil 1 */}
             <div>
-                <h3 className="mb-4">Teil 1 - Detailübersicht</h3>
+                <h3 className="mb-4"><b>Teil 1 - Detailübersicht</b></h3>
                 <div className="space-y-3">
                     {grades.part1.criterionGrades.map((criterion) => (
                         <Card key={criterion.criterionId} className="p-4">
@@ -75,7 +75,7 @@ export function GradesDisplay({grades}: Readonly<GradesDisplayProps>) {
 
             {/* Details Teil 2 */}
             <div>
-                <h3 className="mb-4">Teil 2 - Detailübersicht</h3>
+                <h3 className="mb-4"><b>Teil 2 - Detailübersicht</b></h3>
                 <div className="space-y-3">
                     {grades.part2.criterionGrades.map((criterion) => (
                         <Card key={criterion.criterionId} className="p-4">
@@ -95,7 +95,7 @@ export function GradesDisplay({grades}: Readonly<GradesDisplayProps>) {
 
             {/* Alle Kriterien */}
             <div>
-                <h3 className="mb-4">Alle Kriterien im Überblick</h3>
+                <h3 className="mb-4"><b>Alle Kriterien im Überblick</b></h3>
                 <Card className="p-6">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {[...grades.part1.criterionGrades, ...grades.part2.criterionGrades].map((criterion) => (
@@ -112,7 +112,7 @@ export function GradesDisplay({grades}: Readonly<GradesDisplayProps>) {
 
             {/* Legende */}
             <Card className="p-6 bg-slate-50">
-                <h4 className="mb-4">Berechnungshinweise</h4>
+                <h4 className="mb-4 text-xl"><b>Berechnungshinweise</b></h4>
                 <div className="space-y-2 text-slate-700">
                     <p>
                         <strong>Gütestufe pro Kriterium:</strong> Basiert auf der Anzahl erfüllter Anforderungen

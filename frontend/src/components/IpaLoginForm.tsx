@@ -12,7 +12,7 @@ export function IpaLoginForm({onSave}: Readonly<IpaLoginFormProps>) {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        onSave(ipaId);
+        onSave(ipaId.toUpperCase());
     };
 
     return (
@@ -20,7 +20,7 @@ export function IpaLoginForm({onSave}: Readonly<IpaLoginFormProps>) {
             <div className="space-y-2">
                 <Label htmlFor="ipaId">IPA ID *</Label>
                 <Input
-                    className={"!bg-[#F3F3F5]"}
+                    className={"bg-[#F3F3F5]!"}
                     id="ipaId"
                     type="text"
                     value={ipaId}
