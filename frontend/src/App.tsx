@@ -6,12 +6,12 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from './components/ui/tabs';
 import {Card} from './components/ui/card';
 import {Toaster} from './components/ui/sonner';
 import {toast} from 'sonner';
-import type {Criterion, GradesPayload, PersonData} from "./types.ts";
+import type {Criterion, PersonData} from "./types.ts";
 import {
+    createCriterion,
     createIpa,
     deleteCriterion,
     getAllCriteria, getCriteria,
-    getGrades,
     getIpa, getVersions,
     updateCriterion,
 } from "./utils/service/projectApi.ts";
@@ -28,7 +28,6 @@ export default function App() {
     const [personData, setPersonData] = useState<PersonData | null>(null);
     const [defaultCriteria, setDefaultCriteria] = useState<Criterion[]>([])
     const [criteria, setCriteria] = useState<Criterion[]>([]);
-    const [grades, setGrades] = useState<GradesPayload | null>(null);
     const [loading, setLoading] = useState(true);
     const [isIpaIdModal, setIsIpaIdModal] = useState(false);
 
@@ -52,8 +51,6 @@ export default function App() {
                 setPersonData({...ipa, criteria: null} as PersonData);
                 setCriteria(ipa.criteria)
 
-                await loadGrades(id);
-
                 setIpaId(id)
                 localStorage.setItem('ipaId', id);
             }
@@ -62,17 +59,6 @@ export default function App() {
             toast.error('Fehler beim Laden der Daten');
         } finally {
             setLoading(false);
-        }
-    };
-
-    const loadGrades = async (id: string) => {
-        try {
-            const grades = await getGrades(id);
-            if (grades) {
-                setGrades(grades);
-            }
-        } catch (error) {
-            console.error('Fehler beim Laden der Noten:', error);
         }
     };
 
@@ -112,6 +98,20 @@ export default function App() {
         setIpaId("");
     }
 
+    const saveCriterionMethod = async (criterion: Criterion) => {
+        try {
+            const result = await createCriterion(ipaId, criterion)
+
+            if (result) {
+                setCriteria([...criteria, result]);
+                toast.success('Fortschritt gespeichert');
+            }
+        } catch (error) {
+            console.error('Fehler beim erstellen des Kriteriums:', error);
+            toast.error('Fehler beim erstellen des Kriteriums.');
+        }
+    }
+
     const updateCriterionMethod = async (criterion: Criterion) => {
         try {
             if (!personData?.id) {
@@ -122,8 +122,6 @@ export default function App() {
             if (result) {
                 setCriteria(prev => prev.map(c => c.id === criterion.id ? result : c));
                 toast.success('Fortschritt gespeichert');
-
-                await loadGrades(ipaId);
             }
 
         } catch (error) {
@@ -152,9 +150,8 @@ export default function App() {
             <Header/>
 
             <Dialog open={isIpaIdModal} onClose={() => setIsIpaIdModal(false)} title={"IPA-ID"}>
-                <p><b>Bitte Merke dir diese ID, sie ist dein "Login".</b></p>
-                <br/>
-                <h3>ID: <b className={"text-red-600"}>{ipaId}</b></h3>
+                <p className={"text-center"}><b>Bitte Merke dir diese ID, sie ist dein "Login".</b></p>
+                <p className={"text-center"}><b className={"text-red-600 text-[100px]"}>{ipaId}</b></p>
             </Dialog>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -190,7 +187,8 @@ export default function App() {
                             <h2 className="mb-6 text-2xl"><b>Kriterien und Fortschritt</b></h2>
                             <CriteriaList
                                 criteria={criteria}
-                                onSaveCriterion={updateCriterionMethod}
+                                onSaveCriterion={saveCriterionMethod}
+                                onUpdateCriterion={updateCriterionMethod}
                                 onDeleteCriterion={deleteCriterionMethod}
                                 defaultCriteria={defaultCriteria}
                             />
@@ -207,7 +205,7 @@ export default function App() {
                                     <p><strong>Abgabedatum:</strong> {personData.date}</p>
                                 </div>
                             )}
-                            <GradesDisplay grades={grades}/>
+                            <GradesDisplay id={ipaId}/>
                         </Card>
                     </TabsContent>
                 </Tabs>

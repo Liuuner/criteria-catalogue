@@ -13,6 +13,10 @@ async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T |
 
     const text = await res.text();
 
+    if (res.status === 204) {
+        return null;
+    }
+
     const returnData = JSON.parse(text)
     if (returnData && returnData?.error === undefined) {
         return JSON.parse(text) as T;

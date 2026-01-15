@@ -1,12 +1,20 @@
 import {Card} from './ui/card';
 import {Badge} from './ui/badge';
 import type {GradesPayload} from "../types.ts";
+import {getGrades} from "../utils/service/projectApi.ts";
+import {useEffect, useState} from "react";
 
 interface GradesDisplayProps {
-    grades: GradesPayload | null;
+    id: string;
 }
 
-export function GradesDisplay({grades}: Readonly<GradesDisplayProps>) {
+export function GradesDisplay({id}: Readonly<GradesDisplayProps>) {
+    const [grades, setGrades] = useState<GradesPayload | null>(null);
+
+    useEffect(() => {
+        getGrades(id).then(grades => grades ? setGrades(grades) : null);
+    }, []);
+
     if (!grades) {
         return (
             <div className="text-center py-12 text-slate-500">
