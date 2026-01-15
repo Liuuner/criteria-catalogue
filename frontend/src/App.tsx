@@ -12,7 +12,7 @@ import {
     deleteCriterion,
     getAllCriteria, getCriteria,
     getGrades,
-    getIpa,
+    getIpa, getVersions,
     updateCriterion,
 } from "./utils/service/projectApi.ts";
 import Header from "./components/Header.tsx";
@@ -22,6 +22,8 @@ import {IpaLoginForm} from "./components/IpaLoginForm.tsx";
 import Dialog from "./components/Dialog.tsx";
 
 export default function App() {
+    const [version, setVersion] = useState<string>("0.0.0");
+    const [route, setRoute] = useState('person');
     const [ipaId, setIpaId] = useState<string>(localStorage.getItem('ipaId') ?? "");
     const [personData, setPersonData] = useState<PersonData | null>(null);
     const [defaultCriteria, setDefaultCriteria] = useState<Criterion[]>([])
@@ -31,6 +33,7 @@ export default function App() {
     const [isIpaIdModal, setIsIpaIdModal] = useState(false);
 
     useEffect(() => {
+        void getVersions().then((version) => setVersion(version))
         void loadData(ipaId);
         void getAllCriteria().then(criteria => setDefaultCriteria(criteria));
     }, []);
@@ -44,6 +47,7 @@ export default function App() {
             setLoading(true);
 
             const ipa = await getIpa(id);
+
             if (ipa) {
                 setPersonData({...ipa, criteria: null} as PersonData);
                 setCriteria(ipa.criteria)
@@ -95,7 +99,7 @@ export default function App() {
 
     const ipaLogin = async (ipaIdLogin: string) => {
         try {
-            await loadData(ipaIdLogin);
+            await loadData(ipaIdLogin).then(() => setRoute("person"));
         } catch (error) {
             console.error('Fehler beim Login:', error);
             toast.error('Fehler beim Login');
@@ -139,9 +143,11 @@ export default function App() {
         }
     }
 
-    return loading ? <Loader/> : (
+    return (
         <div className="min-h-screen bg-slate-50">
             <Toaster/>
+
+            {loading && <Loader/>}
 
             <Header/>
 
@@ -152,7 +158,7 @@ export default function App() {
             </Dialog>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <Tabs defaultValue="person" className="space-y-6">
+                <Tabs value={route} onValueChange={value => setRoute(value)} defaultValue="person" className="space-y-6" >
                     <TabsList className="bg-white border border-slate-200">
                         <TabsTrigger value="person">Personendaten</TabsTrigger>
                         {!ipaId &&
@@ -166,7 +172,7 @@ export default function App() {
 
                     <TabsContent value="person">
                         <Card className="p-6">
-                            <h2>Personendaten erfassen</h2>
+                            <h2 className="text-2xl"><b>Personendaten erfassen</b></h2>
                             {ipaId && <h3>IPA-ID: <b className={"text-red-600"}>{ipaId}</b></h3>}
                             <PersonForm initialData={personData} onSave={createIpaMethod} logout={logout}/>
                         </Card>
@@ -174,14 +180,14 @@ export default function App() {
 
                     <TabsContent value="login">
                         <Card className="p-6">
-                            <h2 className="mb-6">IPA Login</h2>
+                            <h2 className="mb-6 text-2xl"><b>IPA Login</b></h2>
                             <IpaLoginForm onSave={ipaLogin}/>
                         </Card>
                     </TabsContent>
 
                     <TabsContent value="criteria">
                         <Card className="p-6">
-                            <h2 className="mb-6">Kriterien und Fortschritt</h2>
+                            <h2 className="mb-6 text-2xl"><b>Kriterien und Fortschritt</b></h2>
                             <CriteriaList
                                 criteria={criteria}
                                 onSaveCriterion={updateCriterionMethod}
@@ -193,7 +199,7 @@ export default function App() {
 
                     <TabsContent value="grades">
                         <Card className="p-6">
-                            <h2 className="mb-6">Mutmassliche Note</h2>
+                            <h1 className="mb-6 text-2xl"><b>Mutmassliche Note</b></h1>
                             {personData && (
                                 <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
                                     <p><strong>Name:</strong> {personData.firstname} {personData.lastname}</p>
@@ -207,7 +213,7 @@ export default function App() {
                 </Tabs>
             </main>
 
-            <Footer/>
+            <Footer version={version}/>
         </div>
     );
 }
