@@ -29,7 +29,7 @@ const Dialog = ({
     if (!open) return null;
 
     return (
-        <div className="fixed inset-0 z-50">
+        <div className="fixed inset-0 z-50 w-full h-full">
             {/* Overlay */}
             <button
                 aria-label="Close dialog overlay"
@@ -42,7 +42,7 @@ const Dialog = ({
                 aria-modal="true"
                 aria-labelledby="dialog-title"
                 aria-describedby={description ? "dialog-desc" : undefined}
-                className="absolute left-1/2 top-1/2 w-[92vw] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-xl"
+                className="absolute left-1/2 top-1/2 min-w-[92vw] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-xl overflow-auto h-10/12"
             >
                 <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
@@ -68,16 +68,6 @@ const Dialog = ({
                 </div>
 
                 <div className="mt-4">{children}</div>
-
-                <div className="mt-6 flex justify-end gap-2">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                    >
-                        OK
-                    </button>
-                </div>
             </div>
         </div>
     );
