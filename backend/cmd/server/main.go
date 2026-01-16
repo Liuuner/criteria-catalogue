@@ -7,6 +7,7 @@ import (
 	"github.com/Liuuner/criteria-catalogue/backend/internal/api"
 	"github.com/Liuuner/criteria-catalogue/backend/internal/common"
 	"github.com/Liuuner/criteria-catalogue/backend/internal/store"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
@@ -40,6 +41,12 @@ func main() {
 	}
 
 	router := gin.Default()
+
+	// CORS-Middleware für die Kommunikation mit dem Frontend
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"} // Passe den Port ggf. an
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	router.Use(cors.New(config))
 
 	router.GET("/version", func(c *gin.Context) {
 		c.String(http.StatusOK, version)

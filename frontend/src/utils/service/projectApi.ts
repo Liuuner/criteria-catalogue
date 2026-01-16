@@ -78,6 +78,6 @@ export async function getAllCriteria(): Promise<Criterion[]> {
 }
 
 export async function getVersions(): Promise<string> {
-    const json = await fetchJson<string>(`${API_BASE}/version`);
-    return json ?? "";
+    const json = await fetch(`${API_BASE}/version`);
+    return await json.text() ?? "";
 }

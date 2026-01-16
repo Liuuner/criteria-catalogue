@@ -1,18 +1,11 @@
 package api
 
 import (
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 // SetupRouter konfiguriert die Routen für die API.
 func SetupRouter(r *gin.Engine, h *Handlers) {
-	// CORS-Middleware für die Kommunikation mit dem Frontend
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"} // Passe den Port ggf. an
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-	r.Use(cors.New(config))
-
 	api := r.Group("/api")
 	{
 		api.POST("/ipa", h.CreateIpaProjectHandler) // Erstellt neues IPA-Projekt (Personendaten + Basiskriterien) von Personendaten
