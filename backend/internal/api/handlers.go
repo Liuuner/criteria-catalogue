@@ -59,7 +59,7 @@ func (h *Handlers) CreateIpaProjectHandler(c *gin.Context) {
 		return
 	}
 
-	personData.Criteria = h.JsonStore.GetMandatoryCriteria()
+	personData.Criteria = h.JsonStore.GetAllCriteria()
 
 	mongoPersonData := personData.MapWithoutId()
 
