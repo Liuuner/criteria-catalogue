@@ -11,8 +11,10 @@ import {
     createCriterion,
     createIpa,
     deleteCriterion,
-    getAllCriteria, getCriteria,
-    getIpa, getVersions,
+    getAllCriteria,
+    getCriteria,
+    getIpa,
+    getVersions,
     updateCriterion,
 } from "./utils/service/projectApi.ts";
 import Header from "./components/Header.tsx";
@@ -20,6 +22,8 @@ import Footer from "./components/Footer.tsx";
 import Loader from "./components/Loader.tsx";
 import {IpaLoginForm} from "./components/IpaLoginForm.tsx";
 import Dialog from "./components/Dialog.tsx";
+import CriteriaSearchList from "./components/CriteriaSearchList.tsx";
+import {ReadOnlyCriterionCard} from "./components/ReadOnlyCriterionCard.tsx";
 
 export default function App() {
     const [version, setVersion] = useState<string>("0.0.0");
@@ -155,7 +159,8 @@ export default function App() {
             </Dialog>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <Tabs value={route} onValueChange={value => setRoute(value)} defaultValue="person" className="space-y-6" >
+                <Tabs value={route} onValueChange={value => setRoute(value)} defaultValue="person"
+                      className="space-y-6">
                     <TabsList className="bg-white border border-slate-200">
                         <TabsTrigger value="person">Personendaten</TabsTrigger>
                         {!ipaId &&
@@ -165,6 +170,7 @@ export default function App() {
                             <TabsTrigger value="criteria">Kriterien erfassen</TabsTrigger>
                             <TabsTrigger value="grades">Notenberechnung</TabsTrigger>
                         </>}
+                        <TabsTrigger value="all-criteria">Alle Kriterien</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="person">
@@ -206,6 +212,15 @@ export default function App() {
                                 </div>
                             )}
                             <GradesDisplay id={ipaId}/>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value={"all-criteria"}>
+                        <Card className="p-6">
+                            <h1 className="mb-6 text-2xl"><b>Alle Kriterien</b></h1>
+                            <CriteriaSearchList criteria={defaultCriteria} renderCriterion={(c) => (
+                                <ReadOnlyCriterionCard key={c.id} className={"border-l-4 border-l-blue-500"} criterion={c} defaultExpanded={false}/>
+                            )}/>
                         </Card>
                     </TabsContent>
                 </Tabs>
