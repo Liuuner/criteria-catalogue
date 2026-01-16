@@ -3,6 +3,7 @@ import {Badge} from './ui/badge';
 import type {GradesPayload} from "../types.ts";
 import {getGrades} from "../utils/service/projectApi.ts";
 import {useEffect, useState} from "react";
+import {CompactCriterionCard} from "./CompactCriterionCard.tsx";
 
 interface GradesDisplayProps {
     id: string;
@@ -107,12 +108,11 @@ export function GradesDisplay({id}: Readonly<GradesDisplayProps>) {
                 <Card className="p-6">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {[...grades.part1.criterionGrades, ...grades.part2.criterionGrades].map((criterion) => (
-                            <div key={criterion.criterionId} className="text-center p-3 rounded-lg bg-slate-50">
-                                <div className="font-mono mb-1">{criterion.criterionId}</div>
-                                <Badge className={getQualityLevelColor(criterion.qualityLevel)}>
-                                    {criterion.qualityLevel}
-                                </Badge>
-                            </div>
+                            <CompactCriterionCard
+                                key={criterion.criterionId}
+                                criterionId={criterion.criterionId}
+                                qualityLevel={criterion.qualityLevel}
+                            />
                         ))}
                     </div>
                 </Card>

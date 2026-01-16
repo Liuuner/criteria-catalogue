@@ -23,14 +23,11 @@ const useFlexSearch = (): UseFlexSearchResult => {
         criteria.forEach((criterion) => {
             // Combine all text fields into a searchable string
             const searchableText = [
+                criterion.id,
                 criterion.title,
                 criterion.question,
                 criterion.notes,
                 ...criterion.requirements,
-                // criterion.qualityLevels["0"].description,
-                // criterion.qualityLevels["1"].description,
-                // criterion.qualityLevels["2"].description,
-                // criterion.qualityLevels["3"].description,
             ].join(" ");
 
             flexIndex.add(criterion.id, searchableText);
