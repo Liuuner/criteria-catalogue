@@ -6,6 +6,7 @@ type DialogProps = {
     description?: string;
     onClose: () => void;
     children?: ReactNode;
+    size?: 'default' | 'small';
 };
 
 const Dialog = ({
@@ -14,6 +15,7 @@ const Dialog = ({
                     description,
                     onClose,
                     children,
+                    size = 'default',
                 }: DialogProps) => {
     useEffect(() => {
         if (!open) return;
@@ -42,7 +44,11 @@ const Dialog = ({
                 aria-modal="true"
                 aria-labelledby="dialog-title"
                 aria-describedby={description ? "dialog-desc" : undefined}
-                className="absolute left-1/2 top-1/2 min-w-[92vw] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-xl overflow-auto h-10/12"
+                className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-xl ${
+                    size === 'small' 
+                        ? 'w-auto max-w-md' 
+                        : 'min-w-[92vw] max-w-lg overflow-auto h-10/12'
+                }`}
             >
                 <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">

@@ -5,6 +5,7 @@ import {Textarea} from './ui/textarea';
 import {Button} from './ui/button';
 import {Label} from './ui/label';
 import {Badge} from './ui/badge';
+import Dialog from './Dialog';
 import type {Criterion} from "../types.ts";
 
 interface CriterionCardProps {
@@ -17,6 +18,7 @@ export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionC
     const [checkedRequirements, setCheckedRequirements] = useState<number[]>(criterion.checked);
     const [notes, setNotes] = useState<string>(criterion.notes);
     const [hasChanges, setHasChanges] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     useEffect(() => {
         setCheckedRequirements(criterion.checked);
@@ -43,7 +45,12 @@ export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionC
     };
 
     const handleDelete = () => {
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = () => {
         onDelete(criterion.id);
+        setIsDeleteDialogOpen(false);
     };
 
     const calculateQualityLevel = () => {
@@ -169,6 +176,23 @@ export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionC
                    </Button>
                </div>
             </div>
+
+            <Dialog
+                open={isDeleteDialogOpen}
+                onClose={() => setIsDeleteDialogOpen(false)}
+                title="Kriterium löschen"
+                description={`Möchten Sie das Kriterium "${criterion.id} – ${criterion.title}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`}
+                size="small"
+            >
+                <div className="flex items-center justify-end gap-3 pt-4">
+                    <Button type="button" variant="secondary" onClick={() => setIsDeleteDialogOpen(false)}>
+                        Abbrechen
+                    </Button>
+                    <Button type="button" variant="destructive" onClick={confirmDelete}>
+                        Löschen
+                    </Button>
+                </div>
+            </Dialog>
         </Card>
     );
 }

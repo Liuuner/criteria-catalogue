@@ -35,8 +35,9 @@ func calculateGradeDetails(criteria []models.Criterion) models.GradeDetails {
 	for i, criterion := range criteria {
 		qualityLevel := calculateCriterionQualityLevel(criterion)
 		criterionGrades[i] = models.CriterionGrade{
-			CriterionID:  criterion.ID,
-			QualityLevel: qualityLevel,
+			CriterionID:    criterion.ID,
+			QualityLevel:   qualityLevel,
+			CriterionTitle: criterion.Title,
 		}
 		totalQualityLevel += qualityLevel
 	}
