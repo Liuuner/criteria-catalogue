@@ -24,11 +24,12 @@ import {IpaLoginForm} from "./components/IpaLoginForm.tsx";
 import Dialog from "./components/Dialog.tsx";
 import CriteriaSearchList from "./components/CriteriaSearchList.tsx";
 import {ReadOnlyCriterionCard} from "./components/ReadOnlyCriterionCard.tsx";
+import {useLocalStorage, useSessionStorage} from "./utils/hooks/useStorage.tsx";
 
 export default function App() {
     const [version, setVersion] = useState<string>("0.0.0");
-    const [route, setRoute] = useState('person');
-    const [ipaId, setIpaId] = useState<string>(localStorage.getItem('ipaId') ?? "");
+    const [route, setRoute] = useSessionStorage("currentRoute", 'person');
+    const [ipaId, setIpaId, clearIpaId] = useLocalStorage<string>("ipaId", "");
     const [personData, setPersonData] = useState<PersonData | null>(null);
     const [defaultCriteria, setDefaultCriteria] = useState<Criterion[]>([])
     const [criteria, setCriteria] = useState<Criterion[]>([]);
@@ -98,7 +99,7 @@ export default function App() {
 
     const logout = () => {
         setPersonData(null);
-        localStorage.removeItem('ipaId');
+        clearIpaId();
         setIpaId("");
     }
 
@@ -153,7 +154,7 @@ export default function App() {
 
             <Header/>
 
-            <Dialog open={isIpaIdModal} onClose={() => setIsIpaIdModal(false)} title={"IPA-ID"}>
+            <Dialog open={isIpaIdModal} size={"small"} onClose={() => setIsIpaIdModal(false)} title={"IPA-ID"}>
                 <p className={"text-center"}><b>Bitte Merke dir diese ID, sie ist dein "Login".</b></p>
                 <p className={"text-center"}><b className={"text-red-600 text-[100px]"}>{ipaId}</b></p>
             </Dialog>
