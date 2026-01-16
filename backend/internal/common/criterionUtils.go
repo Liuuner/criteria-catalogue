@@ -23,13 +23,13 @@ func IsOptionalCriterion(criterionID string) bool {
 	return !IsMandatoryCriterion(criterionID)
 }
 
-func IsCriterionPart1(criterionID string) bool {
+func IsCriterionPart2(criterionID string) bool {
 	if len(criterionID) >= 3 && strings.EqualFold(criterionID[:3], "Doc") {
 		return true
 	}
 	return false
 }
 
-func IsCriterionPart2(criterionID string) bool {
-	return !IsCriterionPart1(criterionID)
+func IsCriterionPart1(criterionID string) bool {
+	return !IsCriterionPart2(criterionID)
 }

@@ -57,11 +57,11 @@ func TestIsCriterionPart1(t *testing.T) {
 		criterionID string
 		want        bool
 	}{
-		{"starts with Doc", "Doc1", true},
-		{"starts with doc (lowercase)", "doc2", true},
-		{"does not start with Doc", "A01", false},
-		{"empty string", "", false},
-		{"short string", "Do", false},
+		{"starts with Doc", "Doc1", false},
+		{"starts with doc (lowercase)", "doc2", false},
+		{"does not start with Doc", "A01", true},
+		{"empty string", "", true},
+		{"short string", "Do", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -78,9 +78,9 @@ func TestIsCriterionPart2(t *testing.T) {
 		criterionID string
 		want        bool
 	}{
-		{"starts with Doc", "Doc1", false},
-		{"does not start with Doc", "A01", true},
-		{"empty string", "", true},
+		{"starts with Doc", "Doc1", true},
+		{"does not start with Doc", "A01", false},
+		{"empty string", "", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

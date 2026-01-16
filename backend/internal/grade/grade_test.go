@@ -53,12 +53,12 @@ func TestCalculateGrade(t *testing.T) {
 			},
 			models.GradeResult{
 				Part1: models.GradeDetails{
-					Grade:               2.67,
-					AverageQualityLevel: 1,
-				},
-				Part2: models.GradeDetails{
 					Grade:               4.33,
 					AverageQualityLevel: 2,
+				},
+				Part2: models.GradeDetails{
+					Grade:               2.67,
+					AverageQualityLevel: 1,
 				},
 			},
 		},

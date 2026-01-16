@@ -11,11 +11,9 @@ interface CriteriaSearchListProps {
     placeholder?: string;
 }
 
-function isCriterionPart1(criterionID: string): boolean {
-    if (criterionID.length >= 3 && criterionID.substring(0, 3).toLowerCase() === "doc") {
-        return true;
-    }
-    return false;
+function isCriterionPart2(criterionID: string): boolean {
+    return criterionID.length >= 3 && criterionID.substring(0, 3).toLowerCase() === "doc";
+
 }
 
 export default function CriteriaSearchList({
@@ -70,10 +68,10 @@ export default function CriteriaSearchList({
         const part2: Criterion[] = [];
 
         filteredCriteria.forEach((criterion) => {
-            if (isCriterionPart1(criterion.id)) {
-                part1.push(criterion);
-            } else {
+            if (isCriterionPart2(criterion.id)) {
                 part2.push(criterion);
+            } else {
+                part1.push(criterion);
             }
         });
 
@@ -115,7 +113,7 @@ export default function CriteriaSearchList({
                 {/* Part 1 Section */}
                 {part1.length > 0 && (
                     <section>
-                        <div className="sticky top-[88px] z-10 bg-background py-3 border-b">
+                        <div className="sticky top-22 z-10 bg-background py-3 border-b">
                             <h2 className="text-lg font-semibold">Teil 1</h2>
                             <p className="text-sm text-muted-foreground">{part1.length} criteria</p>
                         </div>
@@ -132,7 +130,7 @@ export default function CriteriaSearchList({
                 {/* Part 2 Section */}
                 {part2.length > 0 && (
                     <section>
-                        <div className="sticky top-[88px] z-10 bg-background py-3 border-b">
+                        <div className="sticky top-22 z-10 bg-background py-3 border-b">
                             <h2 className="text-lg font-semibold">Teil 2</h2>
                             <p className="text-sm text-muted-foreground">{part2.length} criteria</p>
                         </div>
