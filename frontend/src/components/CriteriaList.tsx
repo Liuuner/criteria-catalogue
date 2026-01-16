@@ -6,6 +6,7 @@ import {Label} from "./ui/label.tsx";
 import {Input} from "./ui/input.tsx";
 import {Checkbox} from "./ui/checkbox.tsx";
 import {Button} from "./ui/button.tsx";
+import CriteriaSearchList from "./CriteriaSearchList.tsx";
 
 interface CriteriaListProps {
     criteria: Criterion[];
@@ -147,14 +148,14 @@ export function CriteriaList({
                 </div>
             )}
 
-            {criteria.map((criterion) => (
+            <CriteriaSearchList criteria={criteria} renderCriterion={(c) => (
                 <CriterionCard
-                    key={criterion.id}
-                    criterion={criterion}
+                    key={c.id}
+                    criterion={c}
                     onSave={onUpdateCriterion}
                     onDelete={onDeleteCriterion}
                 />
-            ))}
+            )}/>
 
             <Dialog
                 open={isCreateDialogOpen}
