@@ -126,7 +126,6 @@ export default function App() {
 
             if (result) {
                 setCriteria(prev => prev.map(c => c.id === criterion.id ? result : c));
-                toast.success('Fortschritt gespeichert');
             }
 
         } catch (error) {

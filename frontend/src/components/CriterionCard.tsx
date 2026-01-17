@@ -1,4 +1,4 @@
-import {useState, useEffect, type ChangeEvent} from 'react';
+import {type ChangeEvent, useState} from 'react';
 import {Card} from './ui/card';
 import {Checkbox} from './ui/checkbox';
 import {Textarea} from './ui/textarea';
@@ -15,33 +15,22 @@ interface CriterionCardProps {
 }
 
 export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionCardProps>) {
-    const [checkedRequirements, setCheckedRequirements] = useState<number[]>(criterion.checked);
-    const [notes, setNotes] = useState<string>(criterion.notes);
-    const [hasChanges, setHasChanges] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-    useEffect(() => {
-        setCheckedRequirements(criterion.checked);
-        setNotes(criterion.notes);
-        setHasChanges(false);
-    }, [criterion]);
 
     const handleCheckChange = (index: number, checked: boolean) => {
         const newChecked = checked
-            ? [...checkedRequirements, index]
-            : checkedRequirements.filter(i => i !== index);
-        setCheckedRequirements(newChecked);
-        setHasChanges(true);
+            ? [...criterion.checked, index]
+            : criterion.checked.filter(i => i !== index);
+        handleSave(newChecked, null);
     };
 
     const handleNotesChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-        setNotes(e.target.value);
-        setHasChanges(true);
+        handleSave(null, e.target.value);
     };
 
-    const handleSave = () => {
-        onSave({...criterion, checked: checkedRequirements, notes});
-        setHasChanges(false);
+    const handleSave = (newChecked: number[] | null, notes: string | null) => {
+        onSave({...criterion, checked: newChecked ?? criterion.checked, notes: notes ?? criterion.notes});
     };
 
     const handleDelete = () => {
@@ -55,7 +44,7 @@ export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionC
 
     const calculateQualityLevel = () => {
         const total = criterion.requirements.length;
-        const checked = checkedRequirements.length;
+        const checked = criterion.checked.length;
 
         if (checked === 0) {
             return 0;
@@ -64,7 +53,7 @@ export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionC
         } else if (criterion
                 .qualityLevels["2"]
                 .requiredIndexes
-                .every(index => checkedRequirements.includes(index))
+                .every(index => criterion.checked.includes(index))
             && criterion
                 .qualityLevels["2"]
                 .minRequirements <= checked
@@ -73,7 +62,7 @@ export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionC
         } else if (criterion
                 .qualityLevels["1"]
                 .requiredIndexes
-                .every(index => checkedRequirements.includes(index))
+                .every(index => criterion.checked.includes(index))
             && criterion
                 .qualityLevels["1"]
                 .minRequirements <= checked
@@ -109,14 +98,14 @@ export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionC
 
             <div className="mb-4">
                 <Label className="mb-3 block">Anforderungen
-                    ({checkedRequirements.length} von {criterion.requirements.length} erfüllt)</Label>
+                    ({criterion.checked.length} von {criterion.requirements.length} erfüllt)</Label>
                 <div className="space-y-3">
                     {criterion.requirements.map((requirement, index) => (
                         <div key={requirement}
                              className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
                             <Checkbox
                                 id={`${criterion.id}-req-${index}`}
-                                checked={checkedRequirements.includes(index)}
+                                checked={criterion.checked.includes(index)}
                                 onCheckedChange={(checked) => handleCheckChange(index, checked as boolean)}
                             />
                             <label
@@ -136,8 +125,8 @@ export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionC
                 </Label>
                 <Textarea
                     id={`${criterion.id}-notes`}
-                    value={notes}
-                    onChange={handleNotesChange}
+                    defaultValue={criterion.notes}
+                    onBlur={handleNotesChange}
                     placeholder="Fügen Sie hier Ihre Notizen hinzu..."
                     rows={3}
                     className="resize-none bg-[#F3F3F5]!"
@@ -159,22 +148,14 @@ export function CriterionCard({criterion, onSave, onDelete}: Readonly<CriterionC
                         ))}
                     </div>
                 </div>
-               <div className="flex gap-3">
-                   <Button
-                       onClick={handleDelete}
-                       variant={"destructive"}
-                   >
-                       Löschen
-                   </Button>
-
-                   <Button
-                       onClick={handleSave}
-                       disabled={!hasChanges}
-                       variant={"default"}
-                   >
-                       Speichern
-                   </Button>
-               </div>
+                <div className="flex gap-3">
+                    <Button
+                        onClick={handleDelete}
+                        variant={"destructive"}
+                    >
+                        Löschen
+                    </Button>
+                </div>
             </div>
 
             <Dialog
