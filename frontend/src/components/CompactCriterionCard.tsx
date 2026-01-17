@@ -1,4 +1,4 @@
-import { cn } from "./ui/utils";
+import {cn} from "./ui/utils";
 
 interface CriterionCardProps {
     criterionId: string;
@@ -12,7 +12,7 @@ function getQualityLevelColor(level: number) {
     return 'bg-linear-to-br from-red-50 to-red-100 text-red-800 border-red-200';
 }
 
-export function CompactCriterionCard({ criterionId, qualityLevel }: Readonly<CriterionCardProps>) {
+export function CompactCriterionCard({criterionId, qualityLevel}: Readonly<CriterionCardProps>) {
     return (
         <div
             className={cn(

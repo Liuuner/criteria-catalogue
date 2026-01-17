@@ -10,7 +10,11 @@ interface ReadOnlyCriterionCardProps {
     className?: string;
 }
 
-export function ReadOnlyCriterionCard({criterion, defaultExpanded = false, className = ''}: Readonly<ReadOnlyCriterionCardProps>) {
+export function ReadOnlyCriterionCard({
+                                          criterion,
+                                          defaultExpanded = false,
+                                          className = ''
+                                      }: Readonly<ReadOnlyCriterionCardProps>) {
     const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
     const checkedRequirements = criterion.checked;
@@ -73,9 +77,9 @@ export function ReadOnlyCriterionCard({criterion, defaultExpanded = false, class
                         Gütestufe {currentQualityLevel}
                     </Badge>*/}
                     {isExpanded ? (
-                        <ChevronUp className="h-5 w-5 text-slate-500" />
+                        <ChevronUp className="h-5 w-5 text-slate-500"/>
                     ) : (
-                        <ChevronDown className="h-5 w-5 text-slate-500" />
+                        <ChevronDown className="h-5 w-5 text-slate-500"/>
                     )}
                 </div>
             </div>
@@ -91,19 +95,22 @@ export function ReadOnlyCriterionCard({criterion, defaultExpanded = false, class
                                 <div
                                     key={requirement}
                                     className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${
-                                        checkedRequirements.includes(index) 
-                                            ? 'bg-green-50 border border-green-200' 
+                                        checkedRequirements.includes(index)
+                                            ? 'bg-green-50 border border-green-200'
                                             : 'bg-slate-50'
                                     }`}
                                 >
-                                    <div className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 mt-0.5 ${
-                                        checkedRequirements.includes(index)
-                                            ? 'bg-green-500 border-green-500 text-white'
-                                            : 'border-slate-300 bg-white'
-                                    }`}>
+                                    <div
+                                        className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 mt-0.5 ${
+                                            checkedRequirements.includes(index)
+                                                ? 'bg-green-500 border-green-500 text-white'
+                                                : 'border-slate-300 bg-white'
+                                        }`}>
                                         {checkedRequirements.includes(index) && (
                                             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                <path fillRule="evenodd"
+                                                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                      clipRule="evenodd"/>
                                             </svg>
                                         )}
                                     </div>

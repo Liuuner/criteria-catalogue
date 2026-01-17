@@ -219,7 +219,8 @@ export default function App() {
                         <Card className="p-6">
                             <h1 className="mb-6 text-2xl"><b>Alle Kriterien</b></h1>
                             <CriteriaSearchList criteria={defaultCriteria} renderCriterion={(c) => (
-                                <ReadOnlyCriterionCard key={c.id} className={"border-l-4 border-l-blue-500"} criterion={c} defaultExpanded={false}/>
+                                <ReadOnlyCriterionCard key={c.id} className={"border-l-4 border-l-blue-500"}
+                                                       criterion={c} defaultExpanded={false}/>
                             )}/>
                         </Card>
                     </TabsContent>
