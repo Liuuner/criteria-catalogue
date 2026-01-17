@@ -68,10 +68,6 @@ export function CriteriaList({
         if (!preset) return;
         setPresetId(preset.id);
         setCreateCriterion(preset);
-        setTimeout(() => {
-            console.log(preset)
-            console.log(createCriterion)
-        }, 1000)
     }
 
     function setRequirementAt(index: number, value: string) {
@@ -265,7 +261,6 @@ export function CriteriaList({
                     {/* Qualitätsstufen */}
                     <div className="space-y-6 pt-2">
                         {LEVELS.map((level) => {
-                            console.log(createCriterion)
                             const ql = createCriterion.qualityLevels[level];
                             return (
                                 <div key={level} className="rounded-lg border border-slate-200 p-4 space-y-4 bg-white">
