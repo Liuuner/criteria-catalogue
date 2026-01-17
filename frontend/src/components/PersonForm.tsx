@@ -42,7 +42,7 @@ export function PersonForm({initialData, onSave, logout}: Readonly<PersonFormPro
                 <Button onClick={() => {
                     logout();
                     setFormData(defaultFormData);
-                }} variant={"destructive"} type={"button"} >
+                }} variant={"destructive"} type={"button"}>
                     Logout
                 </Button>
             )}

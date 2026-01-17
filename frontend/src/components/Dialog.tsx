@@ -45,8 +45,8 @@ const Dialog = ({
                 aria-labelledby="dialog-title"
                 aria-describedby={description ? "dialog-desc" : undefined}
                 className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-xl ${
-                    size === 'small' 
-                        ? 'w-auto max-w-md' 
+                    size === 'small'
+                        ? 'w-auto max-w-md'
                         : 'min-w-[92vw] max-w-lg overflow-auto h-10/12'
                 }`}
             >

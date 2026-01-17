@@ -1,5 +1,5 @@
-import type { Criterion } from "../../types.ts";
-import { useMemo, useState, useCallback } from "react";
+import type {Criterion} from "../../types.ts";
+import {useMemo, useState, useCallback} from "react";
 import FlexSearch from "flexsearch";
 
 interface UseFlexSearchResult {
@@ -48,7 +48,7 @@ const useFlexSearch = (): UseFlexSearchResult => {
             .filter((criterion): criterion is Criterion => criterion !== undefined);
     }, [flexIndex, criteriaMap]);
 
-    return { search, index };
+    return {search, index};
 };
 
 export default useFlexSearch;
