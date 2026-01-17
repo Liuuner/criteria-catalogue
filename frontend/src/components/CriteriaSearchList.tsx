@@ -3,11 +3,14 @@ import type {Criterion} from "../types.ts";
 import {Input} from "./ui/input.tsx";
 import useFlexSearch from "../utils/hooks/useFlexSearch.tsx";
 import {Search, X} from "lucide-react";
+import {compareIds} from "../utils/helper/sortHelper.ts";
+import {Button} from "./ui/button.tsx";
 
 interface CriteriaSearchListProps {
     criteria: Criterion[];
     renderCriterion: (criterion: Criterion) => ReactNode;
     placeholder?: string;
+    openCreationDialog?: () => void;
 }
 
 function isCriterionPart2(criterionID: string): boolean {
@@ -19,6 +22,7 @@ export default function CriteriaSearchList({
                                                criteria,
                                                renderCriterion,
                                                placeholder = "Search criteria...",
+                                               openCreationDialog
                                            }: Readonly<CriteriaSearchListProps>) {
     const [query, setQuery] = useState("");
     const [isPart1Open, setIsPart1Open] = useState(true);
@@ -76,6 +80,9 @@ export default function CriteriaSearchList({
             }
         });
 
+        part1.sort((a, b) => compareIds(a.id, b.id));
+        part2.sort((a, b) => compareIds(a.id, b.id));
+
         return {part1, part2};
     }, [filteredCriteria]);
 
@@ -114,6 +121,12 @@ export default function CriteriaSearchList({
                     {filteredCriteria.length} of {criteria.length} criteria
                 </p>
             </div>
+
+            {((isPart1Open && part1.length !== 0) || (isPart2Open && part2.length !== 0)) && (
+                <Button type="button" onClick={openCreationDialog} variant="secondary">
+                    Neues Kriterium
+                </Button>
+            )}
 
             <div className="flex flex-col">
                 {/* Part 1 Section */}

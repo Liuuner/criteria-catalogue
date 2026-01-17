@@ -144,14 +144,17 @@ export function CriteriaList({
                 </div>
             )}
 
-            <CriteriaSearchList criteria={criteria} renderCriterion={(c) => (
-                <CriterionCard
-                    key={c.id}
-                    criterion={c}
-                    onSave={onUpdateCriterion}
-                    onDelete={onDeleteCriterion}
-                />
-            )}/>
+            <CriteriaSearchList
+                criteria={criteria}
+                openCreationDialog={() => setIsCreateDialogOpen(true)}
+                renderCriterion={(c) => (
+                    <CriterionCard
+                        key={c.id}
+                        criterion={c}
+                        onSave={onUpdateCriterion}
+                        onDelete={onDeleteCriterion}
+                    />
+                )}/>
 
             <Dialog
                 open={isCreateDialogOpen}
