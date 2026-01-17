@@ -10,7 +10,7 @@ interface CriteriaSearchListProps {
     criteria: Criterion[];
     renderCriterion: (criterion: Criterion) => ReactNode;
     placeholder?: string;
-    openCreationDialog: () => void;
+    openCreationDialog?: () => void;
 }
 
 function isCriterionPart2(criterionID: string): boolean {
