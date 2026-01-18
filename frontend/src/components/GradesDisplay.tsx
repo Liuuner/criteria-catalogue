@@ -63,44 +63,48 @@ export function GradesDisplay({id}: Readonly<GradesDisplayProps>) {
             </div>
 
             {/* Details Teil 1 */}
-            <div>
-                <h3 className="mb-4"><b>Teil 1 - Detailübersicht</b></h3>
-                <div className="space-y-3">
-                    {grades.part1.criterionGrades.map((criterion) => (
-                        <Card key={criterion.criterionId} className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                    <Badge variant="outline" className="font-mono">{criterion.criterionId}</Badge>
-                                    <span>{criterion.criterionTitle}</span>
+            {grades.part1.criterionGrades.length > 0 && (
+                <div>
+                    <h3 className="mb-4"><b>Teil 1 - Detailübersicht</b></h3>
+                    <div className="space-y-3">
+                        {grades.part1.criterionGrades.map((criterion) => (
+                            <Card key={criterion.criterionId} className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <Badge variant="outline" className="font-mono">{criterion.criterionId}</Badge>
+                                        <span>{criterion.criterionTitle}</span>
+                                    </div>
+                                    <Badge className={getQualityLevelColor(criterion.qualityLevel)}>
+                                        Gütestufe {criterion.qualityLevel}
+                                    </Badge>
                                 </div>
-                                <Badge className={getQualityLevelColor(criterion.qualityLevel)}>
-                                    Gütestufe {criterion.qualityLevel}
-                                </Badge>
-                            </div>
-                        </Card>
-                    ))}
+                            </Card>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Details Teil 2 */}
-            <div>
-                <h3 className="mb-4"><b>Teil 2 - Detailübersicht</b></h3>
-                <div className="space-y-3">
-                    {grades.part2.criterionGrades.map((criterion) => (
-                        <Card key={criterion.criterionId} className="p-4">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-3">
-                                    <Badge variant="outline" className="font-mono">{criterion.criterionId}</Badge>
-                                    <span>{criterion.criterionTitle}</span>
+            {grades.part2.criterionGrades.length > 0 && (
+                <div>
+                    <h3 className="mb-4"><b>Teil 2 - Detailübersicht</b></h3>
+                    <div className="space-y-3">
+                        {grades.part2.criterionGrades.map((criterion) => (
+                            <Card key={criterion.criterionId} className="p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                        <Badge variant="outline" className="font-mono">{criterion.criterionId}</Badge>
+                                        <span>{criterion.criterionTitle}</span>
+                                    </div>
+                                    <Badge className={getQualityLevelColor(criterion.qualityLevel)}>
+                                        Gütestufe {criterion.qualityLevel}
+                                    </Badge>
                                 </div>
-                                <Badge className={getQualityLevelColor(criterion.qualityLevel)}>
-                                    Gütestufe {criterion.qualityLevel}
-                                </Badge>
-                            </div>
-                        </Card>
-                    ))}
+                            </Card>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Alle Kriterien */}
             <div>

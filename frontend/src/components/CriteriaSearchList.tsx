@@ -88,39 +88,41 @@ export default function CriteriaSearchList({
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="sticky top-0 z-20 bg-background pb-2 pt-2">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground"/>
-                    <Input
-                        ref={inputRef}
-                        type="text"
-                        value={query}
-                        onChange={(e) => {
-                            setIsPart1Open(true);
-                            setIsPart2Open(true);
-                            setQuery(e.target.value)
-                        }}
-                        placeholder={placeholder}
-                        className="w-full pl-10 pr-10 h-12 text-base border-2 border-muted focus:border-primary shadow-sm rounded-lg"
-                    />
-                    {query ? (
-                        <button
-                            onClick={() => setQuery("")}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                            <X className="h-5 w-5"/>
-                        </button>
-                    ) : (
-                        <kbd
-                            className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-                            /
-                        </kbd>
-                    )}
+            {criteria.length !== 0 && (
+                <div className="sticky top-0 z-20 bg-background pb-2 pt-2">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground"/>
+                        <Input
+                            ref={inputRef}
+                            type="text"
+                            value={query}
+                            onChange={(e) => {
+                                setIsPart1Open(true);
+                                setIsPart2Open(true);
+                                setQuery(e.target.value)
+                            }}
+                            placeholder={placeholder}
+                            className="w-full pl-10 pr-10 h-12 text-base border-2 border-muted focus:border-primary shadow-sm rounded-lg"
+                        />
+                        {query ? (
+                            <button
+                                onClick={() => setQuery("")}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                <X className="h-5 w-5"/>
+                            </button>
+                        ) : (
+                            <kbd
+                                className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+                                /
+                            </kbd>
+                        )}
+                    </div>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        {filteredCriteria.length} of {criteria.length} criteria
+                    </p>
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                    {filteredCriteria.length} of {criteria.length} criteria
-                </p>
-            </div>
+            )}
 
             {((isPart1Open && part1.length !== 0) || (isPart2Open && part2.length !== 0)) && (
                 <Button type="button" onClick={openCreationDialog} variant="secondary">

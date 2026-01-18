@@ -32,12 +32,11 @@ export async function getIpa(id: string): Promise<IPA | null> {
 }
 
 export async function createIpa(personData: PersonData): Promise<IPA | null> {
-    const json = await fetchJson<IPA>(`${API_BASE}/api/ipa`, {
+    return await fetchJson<IPA>(`${API_BASE}/api/ipa`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(personData),
     });
-    return json ?? null;
 }
 
 export async function getCriteria(id: string): Promise<Criterion[]> {
@@ -79,5 +78,5 @@ export async function getAllCriteria(): Promise<Criterion[]> {
 
 export async function getVersions(): Promise<string> {
     const json = await fetch(`${API_BASE}/version`);
-    return await json.text() ?? "";
+    return await json.text();
 }
