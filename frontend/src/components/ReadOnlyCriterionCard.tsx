@@ -20,45 +20,6 @@ export function ReadOnlyCriterionCard({
     const checkedRequirements = criterion.checked;
     const notes = criterion.notes;
 
-    const calculateQualityLevel = () => {
-        const total = criterion.requirements.length;
-        const checked = checkedRequirements.length;
-
-        if (checked === 0) {
-            return 0;
-        } else if (checked === total) {
-            return 3;
-        } else if (criterion
-                .qualityLevels["2"]
-                .requiredIndexes
-                .every(index => checkedRequirements.includes(index))
-            && criterion
-                .qualityLevels["2"]
-                .minRequirements <= checked
-        ) {
-            return 2;
-        } else if (criterion
-                .qualityLevels["1"]
-                .requiredIndexes
-                .every(index => checkedRequirements.includes(index))
-            && criterion
-                .qualityLevels["1"]
-                .minRequirements <= checked
-        ) {
-            return 1;
-        } else {
-            return 0;
-        }
-    };
-
-    const currentQualityLevel = calculateQualityLevel();
-    /*const qualityLevelColors = {
-        0: 'bg-red-100 text-red-800 border-red-200',
-        1: 'bg-orange-100 text-orange-800 border-orange-200',
-        2: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-        3: 'bg-green-100 text-green-800 border-green-200'
-    };*/
-
     return (
         <Card className={`p-6 ${className}`}>
             <div
@@ -73,9 +34,6 @@ export function ReadOnlyCriterionCard({
                     <p className="text-slate-600 italic">{criterion.question}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    {/*<Badge className={qualityLevelColors[currentQualityLevel]}>
-                        Gütestufe {currentQualityLevel}
-                    </Badge>*/}
                     {isExpanded ? (
                         <ChevronUp className="h-5 w-5 text-slate-500"/>
                     ) : (
@@ -87,9 +45,6 @@ export function ReadOnlyCriterionCard({
             {isExpanded && (
                 <>
                     <div className="mt-4 mb-4">
-                        <p className="mb-3 text-sm font-medium">
-                            Anforderungen ({checkedRequirements.length} von {criterion.requirements.length} erfüllt)
-                        </p>
                         <div className="space-y-3">
                             {criterion.requirements.map((requirement, index) => (
                                 <div
@@ -137,12 +92,11 @@ export function ReadOnlyCriterionCard({
                         <div className="text-slate-600">
                             <p className="mb-1">Gütestufen:</p>
                             <div className="space-y-1">
-                                <p className={`${3 === currentQualityLevel ? 'font-semibold text-slate-900' : ''}`}>
+                                <p>
                                     3: alle Punkte erfüllt
                                 </p>
                                 {Object.entries(criterion.qualityLevels).sort((a, b) => Number(b[0]) - Number(a[0])).map(([level, qualityLevel]) => (
-                                    <p key={level}
-                                       className={`${level === String(currentQualityLevel) ? 'font-semibold text-slate-900' : ''}`}>
+                                    <p key={level}>
                                         {level}: {qualityLevel.description}
                                     </p>
                                 ))}
