@@ -124,7 +124,7 @@ export default function CriteriaSearchList({
                 </div>
             )}
 
-            {((isPart1Open && part1.length !== 0) || (isPart2Open && part2.length !== 0)) && (
+            {openCreationDialog && ((isPart1Open && part1.length !== 0) || (isPart2Open && part2.length !== 0)) && (
                 <Button type="button" onClick={openCreationDialog} variant="secondary">
                     Neues Kriterium
                 </Button>
