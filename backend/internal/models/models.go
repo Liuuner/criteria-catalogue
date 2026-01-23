@@ -9,12 +9,13 @@ import (
 
 // IpaProject speichert die persönlichen Informationen.
 type MongoIpaProject struct {
-	ID        int         `json:"id"` // ^[A-Z]{2}\d{2}$
-	Firstname string      `json:"firstname"`
-	Lastname  string      `json:"lastname"`
-	Topic     string      `json:"topic"`
-	Date      string      `json:"date"`
-	Criteria  []Criterion `json:"criteria"`
+	ID           int         `json:"id" bson:"id"` // ^[A-Z]{2}\d{2}$
+	Firstname    string      `json:"firstname" bson:"firstname"`
+	Lastname     string      `json:"lastname" bson:"lastname"`
+	Topic        string      `json:"topic" bson:"topic"`
+	Date         string      `json:"date" bson:"date"`
+	PasswordHash string      `json:"-" bson:"passwordHash"` // Never expose password hash in JSON
+	Criteria     []Criterion `json:"criteria" bson:"criteria"`
 }
 
 func (d MongoIpaProject) Map() IpaProject {
@@ -28,12 +29,14 @@ func (d MongoIpaProject) Map() IpaProject {
 	}
 }
 
+// DTO
 type IpaProject struct {
 	ID        string      `json:"id"` // ^[A-Z]{2}\d{2}$
 	Firstname string      `json:"firstname"`
 	Lastname  string      `json:"lastname"`
 	Topic     string      `json:"topic"`
 	Date      string      `json:"date"`
+	Password  string      `json:"password,omitempty"` // Only used for create/login, never returned
 	Criteria  []Criterion `json:"criteria"`
 }
 
@@ -87,6 +90,12 @@ type GradeDetails struct {
 	Grade               float64          `json:"grade"`
 	AverageQualityLevel float64          `json:"averageQualityLevel"`
 	CriterionGrades     []CriterionGrade `json:"criterionGrades"`
+}
+
+// LoginRequest is used for authenticating to an IPA project
+type LoginRequest struct {
+	ID       string `json:"id" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 // CriterionGrade enthält die berechnete Gütestufe für ein Kriterium.

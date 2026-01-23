@@ -14,7 +14,7 @@ import {
     getAllCriteria,
     getCriteria,
     getIpa,
-    getVersions,
+    getVersions, login, logout,
     updateCriterion,
 } from "./utils/service/projectApi.ts";
 import Header from "./components/Header.tsx";
@@ -35,12 +35,25 @@ export default function App() {
     const [criteria, setCriteria] = useState<Criterion[]>([]);
     const [loading, setLoading] = useState(true);
     const [isIpaIdModal, setIsIpaIdModal] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
         void getVersions().then((version) => setVersion(version))
         void loadData(ipaId);
         void getAllCriteria().then(criteria => setDefaultCriteria(criteria));
     }, []);
+
+    const catchUnauthorized = (error: unknown) => {
+        if (error instanceof Error && error.message.includes('401')) {
+            toast.error('Nicht autorisierter Zugriff. Bitte melden Sie sich erneut an.');
+            void logout();
+            setIsLoggedIn(false);
+            setPersonData(null);
+            setRoute("login");
+        } else {
+            throw error;
+        }
+    }
 
     const loadData = async (id: string) => {
         try {
@@ -50,9 +63,10 @@ export default function App() {
 
             setLoading(true);
 
-            const ipa = await getIpa(id);
+            const ipa = await getIpa(id).catch(catchUnauthorized);
 
             if (ipa) {
+                setIsLoggedIn(true)
                 setPersonData({...ipa, criteria: null} as PersonData);
                 setCriteria(ipa.criteria)
 
@@ -70,9 +84,10 @@ export default function App() {
     const createIpaMethod = async (data: PersonData) => {
         try {
             if (data.firstname && data.lastname && data.topic && data.date) {
-                const result = await createIpa(data)
+                const result = await createIpa(data).catch(catchUnauthorized);
 
                 if (result) {
+                    setIsLoggedIn(true);
                     setPersonData({...result, criteria: null} as PersonData);
                     setCriteria(result.criteria);
                     setIpaId(result.id ?? "");
@@ -88,8 +103,14 @@ export default function App() {
         }
     };
 
-    const ipaLogin = async (ipaIdLogin: string) => {
+    const handleLogin = async (ipaIdLogin: string, password: string) => {
         try {
+            const success = await login({id: ipaIdLogin, password: password}).catch(catchUnauthorized);
+            if (!success) {
+                toast.error('Login fehlgeschlagen. Bitte überprüfen Sie Ihre IPA-ID und Ihr Passwort.');
+                return;
+            }
+            setIsLoggedIn(true)
             await loadData(ipaIdLogin).then(() => setRoute("person"));
         } catch (error) {
             console.error('Fehler beim Login:', error);
@@ -97,15 +118,15 @@ export default function App() {
         }
     }
 
-    const logout = () => {
+    const handleLogout = () => {
+        logout().then(() => toast.success("Erfolgreich ausgeloggt")).catch(catchUnauthorized);
         setPersonData(null);
         clearIpaId();
-        setIpaId("");
     }
 
     const saveCriterionMethod = async (criterion: Criterion) => {
         try {
-            const result = await createCriterion(ipaId, criterion)
+            const result = await createCriterion(ipaId, criterion).catch(catchUnauthorized);
 
             if (result) {
                 setCriteria([...criteria, result]);
@@ -122,7 +143,7 @@ export default function App() {
             if (!personData?.id) {
                 return;
             }
-            const result = await updateCriterion(personData?.id, criterion.id, criterion)
+            const result = await updateCriterion(personData?.id, criterion.id, criterion).catch(catchUnauthorized);
 
             if (result) {
                 setCriteria(prev => prev.map(c => c.id === criterion.id ? result : c));
@@ -136,7 +157,7 @@ export default function App() {
 
     const deleteCriterionMethod = async (criterionId: string) => {
         try {
-            await deleteCriterion(ipaId, criterionId).then(() => {
+            await deleteCriterion(ipaId, criterionId).catch(catchUnauthorized).then(() => {
                 void getCriteria(ipaId).then(criteria => setCriteria(criteria))
             })
         } catch (error) {
@@ -163,10 +184,10 @@ export default function App() {
                       className="space-y-6">
                     <TabsList className="bg-white border border-slate-200">
                         <TabsTrigger value="person">Personendaten</TabsTrigger>
-                        {!ipaId &&
+                        {!isLoggedIn &&
                             <TabsTrigger value="login">IPA Login</TabsTrigger>
                         }
-                        {ipaId && <>
+                        {isLoggedIn && <>
                             <TabsTrigger value="criteria">Kriterien erfassen</TabsTrigger>
                             <TabsTrigger value="grades">Notenberechnung</TabsTrigger>
                         </>}
@@ -176,15 +197,15 @@ export default function App() {
                     <TabsContent value="person">
                         <Card className="p-6">
                             <h2 className="text-2xl"><b>Personendaten erfassen</b></h2>
-                            {ipaId && <h3>IPA-ID: <b className={"text-red-600"}>{ipaId}</b></h3>}
-                            <PersonForm initialData={personData} onSave={createIpaMethod} logout={logout}/>
+                            {ipaId && isLoggedIn && <h3>IPA-ID: <b className={"text-red-600"}>{ipaId}</b></h3>}
+                            <PersonForm initialData={personData} onSave={createIpaMethod} logout={handleLogout}/>
                         </Card>
                     </TabsContent>
 
                     <TabsContent value="login">
                         <Card className="p-6">
                             <h2 className="mb-6 text-2xl"><b>IPA Login</b></h2>
-                            <IpaLoginForm onSave={ipaLogin}/>
+                            <IpaLoginForm onLogin={handleLogin} defaultIpaId={ipaId}/>
                         </Card>
                     </TabsContent>
 

@@ -14,8 +14,9 @@ import (
 
 // Handlers enthält den Store für den Zugriff in den Handlern.
 type Handlers struct {
-	MongoStore *store.MongoStore
-	JsonStore  *store.CriteriaStore
+	MongoStore   *store.MongoStore
+	JsonStore    *store.CriteriaStore
+	SecureCookie bool // Whether to use secure cookies (HTTPS)
 }
 
 func (h *Handlers) NotImplementedHandler(c *gin.Context) {
@@ -59,22 +60,49 @@ func (h *Handlers) CreateIpaProjectHandler(c *gin.Context) {
 		return
 	}
 
+	// Validate password is provided
+	if personData.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Passwort ist erforderlich"})
+		return
+	}
+
+	// Hash the password
+	hashedPassword, err := HashPassword(personData.Password)
+	if err != nil {
+		log.Printf("Error hashing password: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Verarbeiten des Passworts"})
+		return
+	}
+
 	personData.Criteria = h.JsonStore.GetMandatoryCriteria()
 
 	mongoPersonData := personData.MapWithoutId()
+	mongoPersonData.PasswordHash = hashedPassword
 
-	var err error
 	mongoPersonData.ID, err = h.MongoStore.GetNewID()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
 	_, err = h.MongoStore.SavePersonData(mongoPersonData)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, err)
-	} else {
-		c.JSON(http.StatusOK, mongoPersonData.Map())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
+
+	// Generate token for immediate use after creation
+	token, err := GenerateToken(mongoPersonData.Map().ID)
+	if err != nil {
+		log.Printf("Error generating token after creation: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Erstellen des Tokens"})
+		return
+	}
+
+	// Set the auth cookie
+	SetAuthCookie(c, token, h.SecureCookie)
+
+	c.JSON(http.StatusOK, mongoPersonData.Map())
 }
 
 func (h *Handlers) GetIpaProjectHandler(c *gin.Context) {
@@ -175,4 +203,52 @@ func (h *Handlers) GetGradeHandler(c *gin.Context) {
 
 	gradeResult := grade.CalculateGrade(project.Criteria)
 	c.JSON(http.StatusOK, gradeResult)
+}
+
+// LoginHandler authenticates a user and returns a token
+func (h *Handlers) LoginHandler(c *gin.Context) {
+	var loginReq models.LoginRequest
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Ungültige Eingabedaten: " + err.Error()})
+		return
+	}
+
+	// Get the project
+	project, err := h.MongoStore.GetIpaProject(loginReq.ID)
+	if errors.Is(err, mongo.ErrNoDocuments) {
+		log.Printf("Login attempt for non-existent project: %s", loginReq.ID)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Ungültige Anmeldedaten"})
+		return
+	}
+	if err != nil {
+		log.Printf("Error retrieving project for login: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler bei der Anmeldung"})
+		return
+	}
+
+	// Check password
+	if !CheckPasswordHash(loginReq.Password, project.PasswordHash) {
+		log.Printf("Invalid password attempt for project: %s", loginReq.ID)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Ungültige Anmeldedaten"})
+		return
+	}
+
+	// Generate token
+	token, err := GenerateToken(loginReq.ID)
+	if err != nil {
+		log.Printf("Error generating token: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fehler beim Erstellen des Tokens"})
+		return
+	}
+
+	// Set the auth cookie
+	SetAuthCookie(c, token, h.SecureCookie)
+
+	c.JSON(http.StatusOK, gin.H{"project": project.Map()})
+}
+
+// LogoutHandler clears the authentication cookie
+func (h *Handlers) LogoutHandler(c *gin.Context) {
+	ClearAuthCookie(c)
+	c.JSON(http.StatusOK, gin.H{"message": "Erfolgreich abgemeldet"})
 }

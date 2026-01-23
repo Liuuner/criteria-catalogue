@@ -9,11 +9,12 @@ Content-Type: application/json
   "firstname": "John",
   "lastname": "Doe",
   "topic": "Sample Topic",
-  "date": "2024-06-15"
+  "date": "2024-06-15",
+  "password": "securepassword"
 }
 
 ### Get IPA by ID
-GET http://localhost:8080/api/ipa/AA02
+GET http://localhost:8080/api/ipa/AA12
 
 ### Get Ipa Criteria by ID
 GET http://localhost:8080/api/ipa/AA02/criteria
