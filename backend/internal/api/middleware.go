@@ -17,7 +17,7 @@ import (
 
 const (
 	// TokenValidityDuration defines how long a token is valid
-	TokenValidityDuration = 1 * time.Minute
+	TokenValidityDuration = 14 * 24 * time.Hour // 3 weeks
 	// CookieName is the name of the authentication cookie
 	CookieName = "ipa_auth_token"
 )
