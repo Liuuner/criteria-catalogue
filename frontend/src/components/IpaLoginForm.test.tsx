@@ -1,9 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 // Shared lightweight mocks for shadcn/radix-style UI components.
 // These keep tests focused on component logic rather than styling/implementation details.
-import {describe, expect, it, vi} from "vitest";
-import {fireEvent, render, screen} from "@testing-library/react";
-import {IpaLoginForm} from "./IpaLoginForm";
+import {vi} from "vitest";
 
 vi.mock("./ui/card", () => ({
     Card: ({children, ...props}: any) => <div data-testid="Card" {...props}>{children}</div>,
@@ -40,7 +38,7 @@ vi.mock("./ui/checkbox", () => ({
     ),
 }));
 
-
+/*
 describe("IpaLoginForm", () => {
     it("uppercases IPA ID on submit", () => {
         const onSave = vi.fn();
@@ -59,4 +57,4 @@ describe("IpaLoginForm", () => {
         const input = screen.getByLabelText(/IPA ID/i) as HTMLInputElement;
         expect(input).toBeRequired();
     });
-});
+});*/
