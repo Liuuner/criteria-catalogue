@@ -1,4 +1,4 @@
-import type {Criterion, GradesPayload, IPA, PersonData} from "../../types.ts";
+import type {Criterion, GradesPayload, IPA, LoginRequest, PersonData} from "../../types.ts";
 import {toast} from "sonner";
 
 const API_BASE = import.meta.env.VITE_API_URL;
@@ -6,17 +6,21 @@ const API_BASE = import.meta.env.VITE_API_URL;
 async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T | null> {
     const res = await fetch(input, {
         ...init,
+        credentials: 'include',
         headers: {
             ...init?.headers,
         },
     });
 
-    const text = await res.text();
+    if (!res.ok && res.status === 401) {
+        throw new Error(`HTTP error! Unauthorized, status: ${res.status}`);
+    }
 
     if (res.status === 204) {
         return null;
     }
 
+    const text = await res.text();
     const returnData = JSON.parse(text)
     if (returnData && returnData?.error === undefined) {
         return JSON.parse(text) as T;
@@ -24,6 +28,41 @@ async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T |
         toast.error(returnData.error);
     }
     return null;
+}
+
+export async function login(request: LoginRequest): Promise<boolean> {
+    const res = await fetch(`${API_BASE}/api/ipa/login`, {
+        method: "POST",
+        credentials: 'include',
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(request),
+    });
+
+    if (res.ok) {
+        return true;
+    } else {
+        const text = await res.text();
+        const returnData = JSON.parse(text)
+        toast.error(returnData.error || 'Login fehlgeschlagen');
+        return false;
+    }
+}
+
+export async function logout(): Promise<boolean> {
+    const res = await fetch(`${API_BASE}/api/ipa/logout`, {
+        method: "POST",
+        credentials: 'include',
+        headers: {"Content-Type": "application/json"}
+    });
+
+    if (res.ok) {
+        return true;
+    } else {
+        const text = await res.text();
+        const returnData = JSON.parse(text)
+        toast.error(returnData.error || 'Login fehlgeschlagen');
+        return false;
+    }
 }
 
 export async function getIpa(id: string): Promise<IPA | null> {

@@ -8,6 +8,7 @@ export interface PersonData {
     lastname: string;
     topic: string;
     date: string;
+    password?: string;
 }
 
 export interface Criterion {
@@ -46,4 +47,9 @@ export interface CriterionGrade {
     criterionId: string;
     criterionTitle: string;
     qualityLevel: number;
+}
+
+export interface LoginRequest {
+    id       : string
+    password : string
 }

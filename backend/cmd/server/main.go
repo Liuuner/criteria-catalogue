@@ -21,6 +21,9 @@ func main() {
 		log.Fatalf("Fehler beim Laden der Konfiguration: %v", err)
 	}
 
+	// Set the token secret for authentication
+	api.SetTokenSecret(cfg.TokenSecret)
+
 	// Initialisiere den Datenspeicher mit der Kriteriendatei
 	dataStore, err := store.NewCriteriaStore(cfg)
 	if err != nil {
@@ -36,16 +39,18 @@ func main() {
 
 	// Initialisiere die Handler mit dem Store
 	handlers := &api.Handlers{
-		JsonStore:  dataStore,
-		MongoStore: mongoStore,
+		JsonStore:    dataStore,
+		MongoStore:   mongoStore,
+		SecureCookie: cfg.SecureCookie,
 	}
 
 	router := gin.Default()
 
 	// CORS-Middleware für die Kommunikation mit dem Frontend
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"} // Passe den Port ggf. an
+	config.AllowOrigins = []string{cfg.AllowedOrigin}
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowCredentials = true // Required for cookies
 	router.Use(cors.New(config))
 
 	router.GET("/version", func(c *gin.Context) {
@@ -53,7 +58,7 @@ func main() {
 	})
 
 	// Richte den Router ein
-	api.SetupRouter(router, handlers)
+	api.SetupRouter(router, handlers, mongoStore)
 
 	router.NoRoute(static.Serve("/", static.LocalFile("./static", true)))
 

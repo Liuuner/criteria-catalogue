@@ -4,15 +4,17 @@ import {type FormEvent, useState} from "react";
 import {Button} from "./ui/button.tsx";
 
 interface IpaLoginFormProps {
-    onSave: (id: string) => void;
+    onLogin: (id: string, password: string) => void;
+    defaultIpaId?: string;
 }
 
-export function IpaLoginForm({onSave}: Readonly<IpaLoginFormProps>) {
-    const [ipaId, setIpaId] = useState("");
+export function IpaLoginForm({onLogin, defaultIpaId = ""}: Readonly<IpaLoginFormProps>) {
+    const [ipaId, setIpaId] = useState(defaultIpaId);
+    const [ipaPassword, setIpaPassword] = useState("");
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        onSave(ipaId.toUpperCase());
+        onLogin(ipaId.toUpperCase(), ipaPassword);
     };
 
     return (
@@ -27,6 +29,18 @@ export function IpaLoginForm({onSave}: Readonly<IpaLoginFormProps>) {
                     onChange={e => setIpaId(e.target.value)}
                     required
                     placeholder="AB12"
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="ipaId">Passwort</Label>
+                <Input
+                    className={"bg-[#F3F3F5]!"}
+                    id="ipaPassword"
+                    type="password"
+                    value={ipaPassword}
+                    onChange={e => setIpaPassword(e.target.value)}
+                    required
+                    placeholder={"Password"}
                 />
             </div>
 

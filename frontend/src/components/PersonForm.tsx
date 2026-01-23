@@ -102,6 +102,18 @@ export function PersonForm({initialData, onSave, logout}: Readonly<PersonFormPro
                 />
             </div>
 
+            {initialData == null && <div className="space-y-2">
+                <Label htmlFor="password">Passwort</Label>
+                <Input
+                    className={"bg-[#F3F3F5]!"}
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={handleChange('password')}
+                    required
+                />
+            </div>}
+
             {initialData === null && (
                 <Button type="submit" className="w-full sm:w-auto">
                     Personendaten speichern
